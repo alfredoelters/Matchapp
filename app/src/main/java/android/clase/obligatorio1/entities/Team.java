@@ -3,10 +3,12 @@ package android.clase.obligatorio1.entities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 /**
  * Created by alfredo on 08/05/15.
  */
-public class Team {
+public class Team implements Serializable {
     public static final String JSON_NAME = "name";
     public static final String JSON_CODE = "code";
     public static final String JSON_SHORT_NAME = "shortName";
@@ -30,7 +32,7 @@ public class Team {
     private String playersLink;
 
 
-    public void Team(JSONObject json) throws JSONException{
+    public Team(JSONObject json) throws JSONException{
         name = json.getString(JSON_NAME);
         code = json.getString(JSON_CODE);
         shortName = json.getString(JSON_SHORT_NAME);

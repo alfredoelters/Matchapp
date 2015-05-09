@@ -3,6 +3,7 @@ package android.clase.obligatorio1.entities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,7 +12,7 @@ import java.util.Date;
 /**
  * Created by alfredo on 08/05/15.
  */
-public class Player {
+public class Player implements Serializable{
     public static final String JSON_NAME = "name";
     public static final String JSON_POSITION = "position";
     public static final String JSON_JERSEY_NUMBER = "jerseyNumber";
