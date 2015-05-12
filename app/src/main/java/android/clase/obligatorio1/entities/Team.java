@@ -31,6 +31,9 @@ public class Team implements Serializable {
     private String fixturesLink;
     private String playersLink;
 
+    public Team(){
+
+    }
 
     public Team(JSONObject json) throws JSONException{
         name = json.getString(JSON_NAME);

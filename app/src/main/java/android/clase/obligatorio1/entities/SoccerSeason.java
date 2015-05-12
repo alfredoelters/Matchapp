@@ -32,6 +32,10 @@ public class SoccerSeason implements Serializable {
     private String fixturesLink;
     private String leagueTableLink;
 
+    public SoccerSeason(){
+
+    }
+
     public SoccerSeason(JSONObject json) throws JSONException {
         caption = json.getString(JSON_CAPTION);
         league = json.getString(JSON_LEAGUE);
