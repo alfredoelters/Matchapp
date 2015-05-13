@@ -1,14 +1,18 @@
 package android.clase.obligatorio1.activities;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.app.Activity;
 import android.clase.obligatorio1.R;
+import android.clase.obligatorio1.entities.Fixture;
+import android.clase.obligatorio1.entities.LeagueTable;
+import android.clase.obligatorio1.entities.Team;
+import android.clase.obligatorio1.utils.WebServiceInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Window;
+
+import java.util.ArrayList;
 
 /**
  * Created by alfredo on 02/05/15.
@@ -29,24 +33,33 @@ public class SplashScreenActivity extends Activity {
 
         setContentView(R.layout.splash_screen);
 
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
 
-                // Start the next activity
-                Intent mainIntent = new Intent().setClass(
-                        SplashScreenActivity.this, HomeActivity.class);
-                startActivity(mainIntent);
+        new FetchFixturesTask().execute();
+    }
 
-                // Close the activity so the user won't able to go back this
-                // activity pressing Back button
-                finish();
-            }
-        };
 
-        // Simulate a long loading process on application startup.
-        Timer timer = new Timer();
-        timer.schedule(task, SPLASH_SCREEN_DELAY);
+    private class FetchFixturesTask extends AsyncTask<Void, Void, ArrayList<Fixture>> {
+
+        @Override
+        protected void onPostExecute(ArrayList<Fixture> registers) {
+            // Start the next activity
+            Intent mainIntent = new Intent().setClass(
+                    SplashScreenActivity.this, HomeActivity.class);
+            startActivity(mainIntent);
+
+            // Close the activity so the user won't able to go back this
+            // activity pressing Back button
+            finish();
+        }
+
+        @Override
+        protected ArrayList<Fixture> doInBackground(Void... params) {
+            Fixture test = WebServiceInterface.getInstance().getFixtureById(133566);
+            Team testTeam = WebServiceInterface.getInstance().getTeamById(109);
+            LeagueTable testLeagueTable = WebServiceInterface.getInstance().getLeagueTableById(357);
+            return new ArrayList<>();
+        }
+
     }
 
 }
