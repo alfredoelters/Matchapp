@@ -1,5 +1,7 @@
 package android.clase.obligatorio1.utils;
 
+import android.clase.obligatorio1.entities.Fixture;
+import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.Team;
 
 import org.json.JSONException;
@@ -19,7 +21,17 @@ public class WebServiceInterface {
     //----------------Teams WS methods----------------
 
     //E.g. = GET http://api.football-data.org/teams/19
+    private static final String GET_FIXTURE_BY_ID = WEB_SERVICE_ENDPOINT + "fixtures/%d";
+
+    //----------------Fixtures WS methods----------------
+
+    //E.g. = GET http://api.football-data.org/alpha/fixtures/133566
     private static final String GET_TEAM_BY_ID = WEB_SERVICE_ENDPOINT + "teams/%d";
+
+    //----------------League Table WS methods----------------
+
+    //E.g. = GET http://api.football-data.org/alpha/soccerseasons/357/leagueTable
+    private static final String GET_LEAGUE_TABLE_BY_ID = WEB_SERVICE_ENDPOINT + "soccerseasons/%d/leagueTable";
 
     private static WebServiceInterface INSTANCE = null;
     private JSONParser parser;
@@ -44,12 +56,35 @@ public class WebServiceInterface {
         if (id == null)
             return null;
         try {
-            return new Team(WebServiceUtils.getJSONObjectFormUrl(String.format(GET_TEAM_BY_ID,id)));
+            return new Team(WebServiceUtils.getJSONObjectFromUrl(String.format(GET_TEAM_BY_ID, id)));
         } catch (Exception e) {
             e.printStackTrace();
             return  null;
         }
     }
 
+    //----------------Fixtures methods----------------
 
+    public Fixture getFixtureById(Integer id){
+        if (id == null)
+            return null;
+        try {
+            return new Fixture(WebServiceUtils.getJSONObjectFromUrl(String.format(GET_FIXTURE_BY_ID, id)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    //---------------League Table methods-------------
+    public LeagueTable getLeagueTableById(Integer id) {
+        if (id == null)
+            return null;
+        try {
+            return new LeagueTable(WebServiceUtils.getJSONObjectFromUrl(String.format(GET_LEAGUE_TABLE_BY_ID, id)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
 }
