@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by alfredo on 12/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 12/05/15.
+ * Class to represent the historic matches between two teams present in the head2head
+ * section returned by the Web Service
  */
-public class Head2Head implements Serializable{
+public class Head2Head implements Serializable {
 
-
+    //Json keys
     public static final String JSON_FIXTURES = "fixtures";
     public static final String JSON_AWAY_WINS = "awayTeamWins";
     public static final String JSON_HOME_WINS = "homeTeamWins";
@@ -23,7 +25,6 @@ public class Head2Head implements Serializable{
     private Integer awayTeamWins;
     private Integer homeTeamWins;
     private Integer draws;
-
     private List<Match> fixtures;
 
     public Head2Head(JSONObject json) throws JSONException, ParseException {

@@ -11,9 +11,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by alfredo on 10/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 10/05/15.
+ * Class to represent a fixture returned by the Web Service
  */
 public class Fixture implements Serializable {
+
+    //Json keys
     public static final String JSON_FIXTURE = "fixture";
     public static final String JSON_DATE = "date";
     public static final String JSON_MATCH_DAY = "matchday";
@@ -29,7 +32,7 @@ public class Fixture implements Serializable {
     public static final String JSON_SOCCER_SEASON_LINK = "homeTeam";
     public static final String JSON_HOME_TEAM_LINKS = "awayTeam";
 
-
+    /** Format in which the WS sends the dates for this request */
     private static final DateFormat responseDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
     private Integer goalsHomeTeam;

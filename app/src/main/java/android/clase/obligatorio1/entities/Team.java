@@ -6,9 +6,12 @@ import org.json.JSONObject;
 import java.io.Serializable;
 
 /**
- * Created by alfredo on 08/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 08/05/15.
+ * Class to represent a team returned by the Web Service.
  */
 public class Team implements Serializable {
+
+    //Json keys
     public static final String JSON_NAME = "name";
     public static final String JSON_CODE = "code";
     public static final String JSON_SHORT_NAME = "shortName";

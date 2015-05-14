@@ -20,10 +20,11 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
- * Created by alfredo on 09/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 09/05/15.
  * This class contains all auxiliary methods used by WebServiceInterface
  */
 public class WebServiceUtils {
+    private static final String AUTHENTICATION_TOKEN = "1d0d83c9a5f24477b9b3fa460ae7410e";
     public static JSONObject getJSONObjectFromUrlAlt(String urlString){
         HttpURLConnection connection = null;
         try {
@@ -73,6 +74,7 @@ public class WebServiceUtils {
             // defaultHttpClient
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpGet httpget = new HttpGet(url);
+            httpget.setHeader("X-Auth-Token",AUTHENTICATION_TOKEN);
             HttpResponse httpResponse = httpClient.execute(httpget);
             HttpEntity httpEntity = httpResponse.getEntity();
             is = httpEntity.getContent();

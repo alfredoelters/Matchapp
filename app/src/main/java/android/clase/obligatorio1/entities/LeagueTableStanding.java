@@ -6,9 +6,12 @@ import org.json.JSONObject;
 import java.io.Serializable;
 
 /**
- * Created by alfredo on 12/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 12/05/15.
+ * Class to represent a row of the positions table of a league returned by the Web Service.
  */
 public class LeagueTableStanding implements Serializable{
+
+    //Json keys
     public static String JSON_POSITION = "position";
     public static String JSON_TEAM_NAME = "teamName";
     public static String JSON_PLAYED_GAMES = "playedGames";

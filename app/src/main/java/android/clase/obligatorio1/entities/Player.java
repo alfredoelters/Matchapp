@@ -10,7 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by alfredo on 08/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 08/05/15.
+ * Class to represent a player of a team returned by the Web Service.
  */
 public class Player implements Serializable{
     public static final String JSON_NAME = "name";
