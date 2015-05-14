@@ -15,7 +15,7 @@ import android.view.Window;
 import java.util.ArrayList;
 
 /**
- * Created by alfredo on 02/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 02/05/15.
  */
 public class SplashScreenActivity extends Activity {
 

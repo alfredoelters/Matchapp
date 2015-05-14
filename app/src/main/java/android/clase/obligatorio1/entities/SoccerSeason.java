@@ -6,9 +6,12 @@ import org.json.JSONObject;
 import java.io.Serializable;
 
 /**
- * Created by alfredo on 09/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 09/05/15.
+ * Class to represent a league returned by the Web Service.
  */
 public class SoccerSeason implements Serializable {
+
+    //Json keys
     public static final String JSON_CAPTION = "caption";
     public static final String JSON_LEAGUE = "league";
     public static final String JSON_YEAR = "year";

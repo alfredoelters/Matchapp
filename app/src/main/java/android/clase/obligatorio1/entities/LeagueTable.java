@@ -9,9 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by alfredo on 12/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 12/05/15.
+ * Class to represent the positions table of a league returned by the Web Service.
  */
 public class LeagueTable implements Serializable{
+
+    //Json keys
     public static final String JSON_CAPTION = "leagueCaption";
     public static final String JSON_STANDING = "standing";
 

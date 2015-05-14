@@ -7,7 +7,7 @@ import android.clase.obligatorio1.entities.Team;
 import org.json.JSONException;
 
 /**
- * Created by alfredo on 08/05/15.
+ * created by Alfredo El Ters and Mathias Cabano on 08/05/15.
  * Interface to mask calls to the WS, its also a Singleton
  */
 public class WebServiceInterface {
