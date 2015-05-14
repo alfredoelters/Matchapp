@@ -40,6 +40,7 @@ public class Fixture implements Serializable {
     private Date date;
     private Integer matchDay;
 
+    //Links to get related entities from the API.
     private String selfLink;
     private String soccerSeasonLink;
     private String homeTeamLink;

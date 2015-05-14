@@ -29,7 +29,7 @@ public class Team implements Serializable {
     private String squadMarketValue;
     private String crestURL;
 
-    //Links para obtener entidades a partir del API.
+    //Links to get related entities from the API.
     private String selfLink;
     private String fixturesLink;
     private String playersLink;
