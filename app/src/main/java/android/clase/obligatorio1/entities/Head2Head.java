@@ -1,5 +1,7 @@
 package android.clase.obligatorio1.entities;
 
+import android.clase.obligatorio1.utils.JsonKeys;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,24 +17,17 @@ import java.util.List;
  * section returned by the Web Service
  */
 public class Head2Head implements Serializable {
-
-    //Json keys
-    public static final String JSON_FIXTURES = "fixtures";
-    public static final String JSON_AWAY_WINS = "awayTeamWins";
-    public static final String JSON_HOME_WINS = "homeTeamWins";
-    public static final String JSON_DRAWS = "draws";
-
     private Integer awayTeamWins;
     private Integer homeTeamWins;
     private Integer draws;
     private List<Match> fixtures;
 
     public Head2Head(JSONObject json) throws JSONException, ParseException {
-        awayTeamWins = json.getInt(JSON_AWAY_WINS);
-        homeTeamWins = json.getInt(JSON_HOME_WINS);
-        draws = json.getInt(JSON_DRAWS);
+        awayTeamWins = json.getInt(JsonKeys.JSON_AWAY_WINS);
+        homeTeamWins = json.getInt(JsonKeys.JSON_HOME_WINS);
+        draws = json.getInt(JsonKeys.JSON_DRAWS);
         fixtures = new ArrayList<>();
-        JSONArray fixturesJson = json.getJSONArray(JSON_FIXTURES);
+        JSONArray fixturesJson = json.getJSONArray(JsonKeys.JSON_FIXTURES);
         JSONObject match;
         for (int i = 0; i < fixturesJson.length(); i++) {
             match = fixturesJson.getJSONObject(i);

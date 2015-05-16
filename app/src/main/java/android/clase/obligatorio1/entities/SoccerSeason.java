@@ -1,5 +1,7 @@
 package android.clase.obligatorio1.entities;
 
+import android.clase.obligatorio1.utils.JsonKeys;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,20 +12,6 @@ import java.io.Serializable;
  * Class to represent a league returned by the Web Service.
  */
 public class SoccerSeason implements Serializable {
-
-    //Json keys
-    public static final String JSON_CAPTION = "caption";
-    public static final String JSON_LEAGUE = "league";
-    public static final String JSON_YEAR = "year";
-    public static final String JSON_NUMBER_OF_TEAMS = "numberOfTeams";
-    public static final String JSON_NUMBER_OF_GAMES = "numberOfGames";
-    public static final String JSON_LINKS = "_links";
-    public static final String JSON_SELF_LINK = "self";
-    public static final String JSON_TEAMS_LINK = "teams";
-    public static final String JSON_FIXTURE_LINK = "fixtures";
-    public static final String JSON_LEAGUE_TABLE_LINK = "leagueTable";
-
-
     private String caption;
     private String league;
     private String year;
@@ -40,16 +28,16 @@ public class SoccerSeason implements Serializable {
     }
 
     public SoccerSeason(JSONObject json) throws JSONException {
-        caption = json.getString(JSON_CAPTION);
-        league = json.getString(JSON_LEAGUE);
-        year = json.getString(JSON_YEAR);
-        numberOfTeams = json.getInt(JSON_NUMBER_OF_TEAMS);
-        numberOfGames = json.getInt(JSON_NUMBER_OF_GAMES);
-        JSONObject links = json.getJSONObject(JSON_LINKS);
-        selfLink = links.getString(JSON_SELF_LINK);
-        teamsLink = links.getString(JSON_TEAMS_LINK);
-        fixturesLink = links.getString(JSON_FIXTURE_LINK);
-        leagueTableLink = links.getString(JSON_LEAGUE_TABLE_LINK);
+        caption = json.getString(JsonKeys.JSON_CAPTION);
+        league = json.getString(JsonKeys.JSON_LEAGUE);
+        year = json.getString(JsonKeys.JSON_YEAR);
+        numberOfTeams = json.getInt(JsonKeys.JSON_NUMBER_OF_TEAMS);
+        numberOfGames = json.getInt(JsonKeys.JSON_NUMBER_OF_GAMES);
+        JSONObject links = json.getJSONObject(JsonKeys.JSON_LINKS);
+        selfLink = links.getString(JsonKeys.JSON_SELF_LINK);
+        teamsLink = links.getString(JsonKeys.JSON_TEAMS_LINK);
+        fixturesLink = links.getString(JsonKeys.JSON_FIXTURE_LINK);
+        leagueTableLink = links.getString(JsonKeys.JSON_LEAGUE_TABLE_LINK);
     }
 
     public String getCaption() {

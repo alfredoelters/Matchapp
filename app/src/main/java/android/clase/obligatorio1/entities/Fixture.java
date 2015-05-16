@@ -1,5 +1,7 @@
 package android.clase.obligatorio1.entities;
 
+import android.clase.obligatorio1.utils.JsonKeys;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,23 +17,6 @@ import java.util.Date;
  * Class to represent a fixture returned by the Web Service
  */
 public class Fixture implements Serializable {
-
-    //Json keys
-    public static final String JSON_FIXTURE = "fixture";
-    public static final String JSON_DATE = "date";
-    public static final String JSON_MATCH_DAY = "matchday";
-    public static final String JSON_HOME_TEAM_NAME = "homeTeamName";
-    public static final String JSON_AWAY_TEAM_NAME = "awayTeamName";
-    public static final String JSON_RESULT = "result";
-    public static final String JSON_GOALS_HOME_TEAM = "goalsHomeTeam";
-    public static final String JSON_GOALS_AWAY_TEAM = "goalsAwayTeam";
-    public static final String JSON_HEAD_TO_HEAD = "head2head";
-
-    public static final String JSON_LINKS = "_links";
-    public static final String JSON_SELF_LINK = "soccerseason";
-    public static final String JSON_SOCCER_SEASON_LINK = "homeTeam";
-    public static final String JSON_HOME_TEAM_LINKS = "awayTeam";
-
     /** Format in which the WS sends the dates for this request */
     private static final DateFormat responseDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
@@ -57,15 +42,15 @@ public class Fixture implements Serializable {
         awayTeam = new Team();
         soccerSeason = new SoccerSeason();
         if (json != null) {
-            JSONObject fixture = json.getJSONObject(JSON_FIXTURE);
-            homeTeam.setName(fixture.getString(JSON_HOME_TEAM_NAME));
-            awayTeam.setName(fixture.getString(JSON_AWAY_TEAM_NAME));
-            date = responseDateFormat.parse(fixture.getString(JSON_DATE));
-            matchDay = fixture.getInt(JSON_MATCH_DAY);
-            JSONObject result = fixture.getJSONObject(JSON_RESULT);
-            goalsHomeTeam = result.getInt(JSON_GOALS_HOME_TEAM);
-            goalsAwayTeam = result.getInt(JSON_GOALS_AWAY_TEAM);
-            head2Head = new Head2Head(json.getJSONObject(JSON_HEAD_TO_HEAD));
+            JSONObject fixture = json.getJSONObject(JsonKeys.JSON_FIXTURE);
+            homeTeam.setName(fixture.getString(JsonKeys.JSON_HOME_TEAM_NAME));
+            awayTeam.setName(fixture.getString(JsonKeys.JSON_AWAY_TEAM_NAME));
+            date = responseDateFormat.parse(fixture.getString(JsonKeys.JSON_DATE));
+            matchDay = fixture.getInt(JsonKeys.JSON_MATCH_DAY);
+            JSONObject result = fixture.getJSONObject(JsonKeys.JSON_RESULT);
+            goalsHomeTeam = result.getInt(JsonKeys.JSON_GOALS_HOME_TEAM);
+            goalsAwayTeam = result.getInt(JsonKeys.JSON_GOALS_AWAY_TEAM);
+            head2Head = new Head2Head(json.getJSONObject(JsonKeys.JSON_HEAD_TO_HEAD));
         }
     }
 

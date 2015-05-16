@@ -1,5 +1,7 @@
 package android.clase.obligatorio1.entities;
 
+import android.clase.obligatorio1.utils.JsonKeys;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,19 +12,6 @@ import java.io.Serializable;
  * Class to represent a team returned by the Web Service.
  */
 public class Team implements Serializable {
-
-    //Json keys
-    public static final String JSON_NAME = "name";
-    public static final String JSON_CODE = "code";
-    public static final String JSON_SHORT_NAME = "shortName";
-    public static final String JSON_MARKET_VALUE = "squadMarketValue";
-    public static final String JSON_CREST_URL = "crestUrl";
-
-    public static final String JSON_LINKS = "_links";
-    public static final String JSON_SELF_LINK = "self";
-    public static final String JSON_FIXTURES_LINK = "fixtures";
-    public static final String JSON_PLAYERS_LINK = "players";
-
     private String name;
     private String code;
     private String shortName;
@@ -39,16 +28,16 @@ public class Team implements Serializable {
     }
 
     public Team(JSONObject json) throws JSONException{
-        name = json.getString(JSON_NAME);
-        code = json.getString(JSON_CODE);
-        shortName = json.getString(JSON_SHORT_NAME);
-        squadMarketValue = json.getString(JSON_CODE);
-        crestURL = json.getString(JSON_CREST_URL);
-        squadMarketValue = json.getString(JSON_MARKET_VALUE);
-        JSONObject links = json.getJSONObject(JSON_LINKS);
-        selfLink = links.getString(JSON_SELF_LINK);
-        fixturesLink = links.getString(JSON_FIXTURES_LINK);
-        playersLink = links.getString(JSON_PLAYERS_LINK);
+        name = json.getString(JsonKeys.JSON_NAME);
+        code = json.getString(JsonKeys.JSON_CODE);
+        shortName = json.getString(JsonKeys.JSON_SHORT_NAME);
+        squadMarketValue = json.getString(JsonKeys.JSON_CODE);
+        crestURL = json.getString(JsonKeys.JSON_CREST_URL);
+        squadMarketValue = json.getString(JsonKeys.JSON_MARKET_VALUE);
+        JSONObject links = json.getJSONObject(JsonKeys.JSON_LINKS);
+        selfLink = links.getString(JsonKeys.JSON_SELF_LINK);
+        fixturesLink = links.getString(JsonKeys.JSON_FIXTURES_LINK);
+        playersLink = links.getString(JsonKeys.JSON_PLAYERS_LINK);
     }
 
     public String getName() {

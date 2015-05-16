@@ -1,5 +1,7 @@
 package android.clase.obligatorio1.entities;
 
+import android.clase.obligatorio1.utils.JsonKeys;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,19 +12,6 @@ import java.io.Serializable;
  * Class to represent a row of the positions table of a league returned by the Web Service.
  */
 public class LeagueTableStanding implements Serializable{
-
-    //Json keys
-    public static String JSON_POSITION = "position";
-    public static String JSON_TEAM_NAME = "teamName";
-    public static String JSON_PLAYED_GAMES = "playedGames";
-    public static String JSON_POINTS = "points";
-    public static String JSON_GOALS = "goals";
-    public static String JSON_GOALS_AGAINST = "goalsAgainst";
-    public static String JSON_GOALS_DIFFERENCE = "goalDifference";
-
-    public static String JSON_LINKS = "_links";
-    public static String JSON_TEAM_LINK = "team";
-
     private Integer position;
     private String teamName;
     private Integer playedGames;
@@ -34,13 +23,13 @@ public class LeagueTableStanding implements Serializable{
 
     public  LeagueTableStanding(JSONObject json) throws JSONException {
         if (json != null) {
-            position = json.getInt(JSON_POINTS);
-            teamName = json.getString(JSON_TEAM_NAME);
-            playedGames = json.getInt(JSON_PLAYED_GAMES);
-            points = json.getInt(JSON_POINTS);
-            goals = json.getInt(JSON_GOALS);
-            goalsAgainst = json.getInt(JSON_GOALS_AGAINST);
-            goalDifference = json.getInt(JSON_GOALS_DIFFERENCE);
+            position = json.getInt(JsonKeys.JSON_POINTS);
+            teamName = json.getString(JsonKeys.JSON_TEAM_NAME);
+            playedGames = json.getInt(JsonKeys.JSON_PLAYED_GAMES);
+            points = json.getInt(JsonKeys.JSON_POINTS);
+            goals = json.getInt(JsonKeys.JSON_GOALS);
+            goalsAgainst = json.getInt(JsonKeys.JSON_GOALS_AGAINST);
+            goalDifference = json.getInt(JsonKeys.JSON_GOALS_DIFFERENCE);
         }
     }
 
