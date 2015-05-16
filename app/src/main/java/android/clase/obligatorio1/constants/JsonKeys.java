@@ -1,4 +1,4 @@
-package android.clase.obligatorio1.utils;
+package android.clase.obligatorio1.constants;
 
 /**
  * Created by Alfredo El Ters and Mathias Cabano on 15/05/15.
@@ -48,7 +48,7 @@ public class JsonKeys {
     public static final String JSON_NATIONALITY = "nationality";
     public static final String JSON_MARKET_VALUE = "marketValue";
     public static final String JSON_DATE_OF_BIRTH = "dateOfBirth";
-    public static final String JSON_CONTRACT_UNTIL= "contractUntil";
+    public static final String JSON_CONTRACT_UNTIL = "contractUntil";
 
     public static final String JSON_LEAGUE = "league";
     public static final String JSON_YEAR = "year";

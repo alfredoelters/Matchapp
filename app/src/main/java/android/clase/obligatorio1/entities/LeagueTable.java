@@ -1,6 +1,6 @@
 package android.clase.obligatorio1.entities;
 
-import android.clase.obligatorio1.utils.JsonKeys;
+import android.clase.obligatorio1.constants.JsonKeys;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,12 +14,12 @@ import java.util.List;
  * created by Alfredo El Ters and Mathias Cabano on 12/05/15.
  * Class to represent the positions table of a league returned by the Web Service.
  */
-public class LeagueTable implements Serializable{
+public class LeagueTable implements Serializable {
     private String leagueCaption;
     private List<LeagueTableStanding> standings;
 
     public LeagueTable(JSONObject json) throws JSONException {
-        if(json != null) {
+        if (json != null) {
             leagueCaption = json.getString(JsonKeys.JSON_CAPTION);
             standings = new ArrayList<>();
             JSONArray standingsJson = json.getJSONArray(JsonKeys.JSON_STANDING);

@@ -1,6 +1,6 @@
 package android.clase.obligatorio1.entities;
 
-import android.clase.obligatorio1.utils.JsonKeys;
+import android.clase.obligatorio1.constants.JsonKeys;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +11,7 @@ import java.io.Serializable;
  * created by Alfredo El Ters and Mathias Cabano on 12/05/15.
  * Class to represent a row of the positions table of a league returned by the Web Service.
  */
-public class LeagueTableStanding implements Serializable{
+public class LeagueTableStanding implements Serializable {
     private Integer position;
     private String teamName;
     private Integer playedGames;
@@ -21,7 +21,7 @@ public class LeagueTableStanding implements Serializable{
     private Integer goalDifference;
 
 
-    public  LeagueTableStanding(JSONObject json) throws JSONException {
+    public LeagueTableStanding(JSONObject json) throws JSONException {
         if (json != null) {
             position = json.getInt(JsonKeys.JSON_POINTS);
             teamName = json.getString(JsonKeys.JSON_TEAM_NAME);

@@ -1,8 +1,11 @@
 package android.clase.obligatorio1.utils;
 
+import android.clase.obligatorio1.constants.JsonKeys;
+import android.clase.obligatorio1.constants.WebServiceURLs;
 import android.clase.obligatorio1.entities.Fixture;
 import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.Match;
+import android.clase.obligatorio1.entities.SoccerSeason;
 import android.clase.obligatorio1.entities.Team;
 
 import org.json.JSONArray;
@@ -21,38 +24,6 @@ import java.util.List;
  * Interface to mask calls to the WS, its also a Singleton
  */
 public class WebServiceInterface {
-    private static final String WEB_SERVICE_ENDPOINT = "http://api.football-data.org/alpha/";
-
-    //------------SoccerSeasons WS methods------------
-
-    //E.g. = GET http://api.football-data.org/alpha/soccerseasons/354
-    private static final String GET_SOCCER_SEASON_BY_ID = WEB_SERVICE_ENDPOINT + "soccerseasons/%d";
-
-    //----------------Teams WS methods----------------
-
-    //E.g. = GET http://api.football-data.org/teams/19
-    private static final String GET_TEAM_BY_ID = WEB_SERVICE_ENDPOINT + "teams/%d";
-
-
-    //----------------Fixtures WS methods----------------
-
-    //E.g. = GET http://api.football-data.org/alpha/fixtures/133566
-    private static final String GET_FIXTURE_BY_ID = WEB_SERVICE_ENDPOINT + "fixtures/%d";
-
-    //E.g. = GET http://api.football­data.org/alpha/fixtures/?timeFrameStart=2015­04­18&timeFrameEnd=2015­04­18
-    private static final String GET_FIXTURES_OF_DATE_FOR_ALL_LEAGUES = WEB_SERVICE_ENDPOINT +
-            "fixtures/?timeFrameStart=%s&timeFrameEnd=%s";
-
-    //E.g. = GET http://api.football­data.org/alpha/fixtures/?timeFrameStart=2015­04­18&timeFrameEnd=2015­04­18
-    private static final String GET_FIXTURES_OF_DATE_FOR_LEAGUE = WEB_SERVICE_ENDPOINT +
-            "soccerseasons/%d/fixtures/?timeFrameStart=%s&timeFrameEnd=%s";
-
-    //----------------League Table WS methods----------------
-
-    //E.g. = GET http://api.football-data.org/alpha/soccerseasons/357/leagueTable
-    private static final String GET_LEAGUE_TABLE_BY_ID = WEB_SERVICE_ENDPOINT + "soccerseasons/%d/leagueTable";
-
-
     private static final DateFormat RESPONSE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     private static WebServiceInterface INSTANCE = null;
@@ -69,7 +40,10 @@ public class WebServiceInterface {
     }
 
     //------------SoccerSeasons methods------------
-
+    public List<SoccerSeason> getSoccerSeasons(){
+        JSONArray response = WebServiceUtils.getJSONArrayFromUrl(WebServiceURLs.GET_ALL_SOCCER_SEASONS);
+        return null;
+    }
 
     //----------------Teams methods----------------
 
@@ -83,7 +57,7 @@ public class WebServiceInterface {
         if (id == null)
             return null;
         try {
-            return new Team(WebServiceUtils.getJSONObjectFromUrl(String.format(GET_TEAM_BY_ID, id)));
+            return new Team(WebServiceUtils.getJSONObjectFromUrl(String.format(WebServiceURLs.GET_TEAM_BY_ID, id)));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -102,7 +76,7 @@ public class WebServiceInterface {
         if (id == null)
             return null;
         try {
-            return new Fixture(WebServiceUtils.getJSONObjectFromUrl(String.format(GET_FIXTURE_BY_ID, id)));
+            return new Fixture(WebServiceUtils.getJSONObjectFromUrl(String.format(WebServiceURLs.GET_FIXTURE_BY_ID, id)));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -121,9 +95,9 @@ public class WebServiceInterface {
         String request;
         String dateString = RESPONSE_DATE_FORMAT.format(date);
         if (soccerSeasonId == null) {
-            request = String.format(GET_FIXTURES_OF_DATE_FOR_ALL_LEAGUES, dateString, dateString);
+            request = String.format(WebServiceURLs.GET_FIXTURES_OF_DATE_FOR_ALL_LEAGUES, dateString, dateString);
         } else {
-            request = String.format(GET_FIXTURES_OF_DATE_FOR_LEAGUE, soccerSeasonId,
+            request = String.format(WebServiceURLs.GET_FIXTURES_OF_DATE_FOR_LEAGUE, soccerSeasonId,
                     dateString, dateString);
         }
         JSONObject response = WebServiceUtils.getJSONObjectFromUrl(request);
@@ -147,6 +121,7 @@ public class WebServiceInterface {
 
     /**
      * Method to get a league table by its id
+     *
      * @param id
      * @return league table
      */
@@ -155,7 +130,7 @@ public class WebServiceInterface {
             return null;
         try {
             return new LeagueTable(WebServiceUtils.getJSONObjectFromUrl(
-                    String.format(GET_LEAGUE_TABLE_BY_ID, id)));
+                    String.format(WebServiceURLs.GET_LEAGUE_TABLE_BY_ID, id)));
         } catch (Exception e) {
             e.printStackTrace();
             return null;

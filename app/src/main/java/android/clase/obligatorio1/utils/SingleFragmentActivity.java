@@ -9,7 +9,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 
 
-
 public abstract class SingleFragmentActivity extends Activity {
     protected abstract Fragment createFragment();
 

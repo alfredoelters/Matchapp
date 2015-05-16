@@ -1,6 +1,6 @@
 package android.clase.obligatorio1.entities;
 
-import android.clase.obligatorio1.utils.JsonKeys;
+import android.clase.obligatorio1.constants.JsonKeys;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +15,7 @@ import java.util.Date;
  * created by Alfredo El Ters and Mathias Cabano on 08/05/15.
  * Class to represent a player of a team returned by the Web Service.
  */
-public class Player implements Serializable{
+public class Player implements Serializable {
     private String name;
     private String position;
     private Integer jerseyNumber;
