@@ -6,6 +6,7 @@ import android.clase.obligatorio1.activities.HomeActivity;
 import android.clase.obligatorio1.entities.Fixture;
 import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.Match;
+import android.clase.obligatorio1.entities.SoccerSeason;
 import android.clase.obligatorio1.entities.Team;
 import android.clase.obligatorio1.utils.SingleFragmentActivity;
 import android.clase.obligatorio1.utils.WebServiceInterface;
@@ -17,8 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public class SplashScreenFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.splash_screen, container, false);
+        return inflater.inflate(R.layout.fragment_splash_screen, container, false);
     }
 
 
@@ -62,6 +63,7 @@ public class SplashScreenFragment extends Fragment {
             Team testTeam = WebServiceInterface.getInstance().getTeamById(109);
             LeagueTable testLeagueTable = WebServiceInterface.getInstance().getLeagueTableById(357);
             List<Match> fixtures = WebServiceInterface.getInstance().getFixturesForDate(new Date(), null);
+            List<SoccerSeason> soccerSeasons = WebServiceInterface.getInstance().getSoccerSeasons();
             return new ArrayList<>();
         }
 

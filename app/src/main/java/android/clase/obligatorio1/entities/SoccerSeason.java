@@ -1,6 +1,6 @@
 package android.clase.obligatorio1.entities;
 
-import android.clase.obligatorio1.utils.JsonKeys;
+import android.clase.obligatorio1.constants.JsonKeys;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +23,7 @@ public class SoccerSeason implements Serializable {
     private String fixturesLink;
     private String leagueTableLink;
 
-    public SoccerSeason(){
+    public SoccerSeason() {
 
     }
 

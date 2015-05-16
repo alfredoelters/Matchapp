@@ -1,6 +1,6 @@
 package android.clase.obligatorio1.entities;
 
-import android.clase.obligatorio1.utils.JsonKeys;
+import android.clase.obligatorio1.constants.JsonKeys;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +17,9 @@ import java.util.Date;
  * by the Web Service.
  */
 public class Match implements Serializable {
-    /** Format in which the WS sends the dates for this request */
+    /**
+     * Format in which the WS sends the dates for this request
+     */
     private static final DateFormat responseDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
     private Date date;

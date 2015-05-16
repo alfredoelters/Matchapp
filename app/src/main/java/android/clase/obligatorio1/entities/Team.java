@@ -1,6 +1,6 @@
 package android.clase.obligatorio1.entities;
 
-import android.clase.obligatorio1.utils.JsonKeys;
+import android.clase.obligatorio1.constants.JsonKeys;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,11 +23,11 @@ public class Team implements Serializable {
     private String fixturesLink;
     private String playersLink;
 
-    public Team(){
+    public Team() {
 
     }
 
-    public Team(JSONObject json) throws JSONException{
+    public Team(JSONObject json) throws JSONException {
         name = json.getString(JsonKeys.JSON_NAME);
         code = json.getString(JsonKeys.JSON_CODE);
         shortName = json.getString(JsonKeys.JSON_SHORT_NAME);

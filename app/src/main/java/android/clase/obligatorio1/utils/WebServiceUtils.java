@@ -7,6 +7,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,7 +26,8 @@ import java.util.Scanner;
  */
 public class WebServiceUtils {
     private static final String AUTHENTICATION_TOKEN = "1d0d83c9a5f24477b9b3fa460ae7410e";
-    public static JSONObject getJSONObjectFromUrl(String urlString){
+
+    public static JSONObject getJSONObjectFromUrl(String urlString) {
         HttpURLConnection connection = null;
         try {
             URL url = new URL(urlString);
@@ -37,16 +39,42 @@ public class WebServiceUtils {
             Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8");
             StringBuilder sb = new StringBuilder();
 
-            while (scanner.hasNextLine()){
+            while (scanner.hasNextLine()) {
                 sb.append(scanner.nextLine());
             }
 
-           return new JSONObject(sb.toString());
+            return new JSONObject(sb.toString());
 
         } catch (IOException | JSONException e) {
             e.printStackTrace();
-        }finally {
-            if(connection != null)  connection.disconnect();
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+        return null;
+    }
+
+    public static JSONArray getJSONArrayFromUrl(String urlString) {
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(urlString);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("X-Auth-Token", AUTHENTICATION_TOKEN);
+            connection.connect();
+
+            Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8");
+            StringBuilder sb = new StringBuilder();
+
+            while (scanner.hasNextLine()) {
+                sb.append(scanner.nextLine());
+            }
+
+            return new JSONArray(sb.toString());
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) connection.disconnect();
         }
         return null;
     }
@@ -76,7 +104,7 @@ public class WebServiceUtils {
             // defaultHttpClient
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpGet httpget = new HttpGet(url);
-            httpget.setHeader("X-Auth-Token",AUTHENTICATION_TOKEN);
+            httpget.setHeader("X-Auth-Token", AUTHENTICATION_TOKEN);
             HttpResponse httpResponse = httpClient.execute(httpget);
             HttpEntity httpEntity = httpResponse.getEntity();
             is = httpEntity.getContent();
