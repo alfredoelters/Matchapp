@@ -25,11 +25,13 @@ import java.util.Scanner;
  */
 public class WebServiceUtils {
     private static final String AUTHENTICATION_TOKEN = "1d0d83c9a5f24477b9b3fa460ae7410e";
-    public static JSONObject getJSONObjectFromUrlAlt(String urlString){
+    public static JSONObject getJSONObjectFromUrl(String urlString){
         HttpURLConnection connection = null;
         try {
             URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("X-Auth-Token", AUTHENTICATION_TOKEN);
             connection.connect();
 
             Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8");
@@ -50,7 +52,7 @@ public class WebServiceUtils {
     }
 
 
-    public static JSONObject getJSONObjectFromUrl(String url) {
+    public static JSONObject getJSONObjectFromUrlAlt(String url) {
         // Making HTTP request
         String json = getJSONStringResponse(url);
         if (json == null)
@@ -66,7 +68,7 @@ public class WebServiceUtils {
         return jObject;
     }
 
-    private static String getJSONStringResponse(String url) {
+    public static String getJSONStringResponse(String url) {
         // Making HTTP request
         InputStream is = null;
         String json = "";

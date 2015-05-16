@@ -1,5 +1,7 @@
 package android.clase.obligatorio1.entities;
 
+import android.clase.obligatorio1.utils.JsonKeys;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,15 +17,6 @@ import java.util.Date;
  * by the Web Service.
  */
 public class Match implements Serializable {
-
-    //Json keys
-    public static final String JSON_DATE = "date";
-    public static final String JSON_HOME_TEAM_NAME = "homeTeamName";
-    public static final String JSON_AWAY_TEAM_NAME = "awayTeamName";
-    public static final String JSON_RESULT = "result";
-    public static final String JSON_GOALS_HOME_TEAM = "goalsHomeTeam";
-    public static final String JSON_GOALS_AWAY_TEAM = "goalsAwayTeam";
-
     /** Format in which the WS sends the dates for this request */
     private static final DateFormat responseDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
@@ -35,12 +28,12 @@ public class Match implements Serializable {
 
     public Match(JSONObject json) throws JSONException, ParseException {
         if (json != null) {
-            date = responseDateFormat.parse(json.getString(JSON_DATE));
-            homeTeamName = json.getString(JSON_HOME_TEAM_NAME);
-            awayTeamName = json.getString(JSON_AWAY_TEAM_NAME);
-            JSONObject result = json.getJSONObject(JSON_RESULT);
-            goalsHomeTeam = result.getInt(JSON_GOALS_HOME_TEAM);
-            goalsAwayTeam = result.getInt(JSON_GOALS_AWAY_TEAM);
+            date = responseDateFormat.parse(json.getString(JsonKeys.JSON_DATE));
+            homeTeamName = json.getString(JsonKeys.JSON_HOME_TEAM_NAME);
+            awayTeamName = json.getString(JsonKeys.JSON_AWAY_TEAM_NAME);
+            JSONObject result = json.getJSONObject(JsonKeys.JSON_RESULT);
+            goalsHomeTeam = result.getInt(JsonKeys.JSON_GOALS_HOME_TEAM);
+            goalsAwayTeam = result.getInt(JsonKeys.JSON_GOALS_AWAY_TEAM);
         }
     }
 
