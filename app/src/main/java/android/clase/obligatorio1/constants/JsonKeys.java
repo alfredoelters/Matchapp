@@ -8,7 +8,7 @@ public class JsonKeys {
 
     //Links to get other entities
     public static final String JSON_LINKS = "_links";
-    public static final String JSON_SELF_LINK = "soccerseason";
+    public static final String JSON_SELF_LINK = "self";
     public static final String JSON_SOCCER_SEASON_LINK = "homeTeam";
     public static final String JSON_HOME_TEAM_LINKS = "awayTeam";
     public static final String JSON_TEAM_LINK = "team";
@@ -32,7 +32,7 @@ public class JsonKeys {
     public static final String JSON_HOME_WINS = "homeTeamWins";
     public static final String JSON_DRAWS = "draws";
 
-    public static final String JSON_CAPTION = "leagueCaption";
+    public static final String JSON_LEAGUE_CAPTION = "leagueCaption";
     public static final String JSON_STANDING = "standing";
 
     public static final String JSON_POSITION = "position";
@@ -52,6 +52,7 @@ public class JsonKeys {
 
     public static final String JSON_LEAGUE = "league";
     public static final String JSON_YEAR = "year";
+    public static final String JSON_CAPTION = "caption";
     public static final String JSON_NUMBER_OF_TEAMS = "numberOfTeams";
     public static final String JSON_NUMBER_OF_GAMES = "numberOfGames";
     public static final String JSON_FIXTURE_LINK = "fixtures";

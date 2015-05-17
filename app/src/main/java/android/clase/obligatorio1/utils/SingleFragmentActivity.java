@@ -8,7 +8,10 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
-
+/**
+ * Created by Alfredo El Ters and Mathias Cabano on 15/05/15.
+ * Simple utility activity containing a single fragment
+ */
 public abstract class SingleFragmentActivity extends Activity {
     protected abstract Fragment createFragment();
 

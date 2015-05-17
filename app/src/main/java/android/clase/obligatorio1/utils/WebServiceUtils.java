@@ -27,6 +27,11 @@ import java.util.Scanner;
 public class WebServiceUtils {
     private static final String AUTHENTICATION_TOKEN = "1d0d83c9a5f24477b9b3fa460ae7410e";
 
+    /**
+     * Method to execute an http GET to a URL and return the result as a JSONObject
+     * @param urlString
+     * @return response JSONObject
+     */
     public static JSONObject getJSONObjectFromUrl(String urlString) {
         HttpURLConnection connection = null;
         try {
@@ -53,6 +58,11 @@ public class WebServiceUtils {
         return null;
     }
 
+    /**
+     * Method to execute an http GET to a URL and return the result as a JSONArray
+     * @param urlString
+     * @return response JSONArray
+     */
     public static JSONArray getJSONArrayFromUrl(String urlString) {
         HttpURLConnection connection = null;
         try {
@@ -79,59 +89,34 @@ public class WebServiceUtils {
         return null;
     }
 
-
-    public static JSONObject getJSONObjectFromUrlAlt(String url) {
-        // Making HTTP request
-        String json = getJSONStringResponse(url);
-        if (json == null)
-            return null;
-        JSONObject jObject = null;
-        // try parse the string to a JSON object
+    /**
+     * Method to execute an http GET to a URL and return the result as a String
+     * @param urlString
+     * @return response String
+     */
+    public static String getJSONStringFromUrl(String urlString){
+        HttpURLConnection connection = null;
         try {
-            jObject = new JSONObject(json);
-        } catch (JSONException e) {
-            Log.e("JSON Parser", "Error parsing data " + e.toString());
-        }
-        // return JSON String
-        return jObject;
-    }
+            URL url = new URL(urlString);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("X-Auth-Token", AUTHENTICATION_TOKEN);
+            connection.connect();
 
-    public static String getJSONStringResponse(String url) {
-        // Making HTTP request
-        InputStream is = null;
-        String json = "";
-        try {
-            // defaultHttpClient
-            DefaultHttpClient httpClient = new DefaultHttpClient();
-            HttpGet httpget = new HttpGet(url);
-            httpget.setHeader("X-Auth-Token", AUTHENTICATION_TOKEN);
-            HttpResponse httpResponse = httpClient.execute(httpget);
-            HttpEntity httpEntity = httpResponse.getEntity();
-            is = httpEntity.getContent();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return null;
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-            return null;
+            Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8");
+            StringBuilder sb = new StringBuilder();
+
+            while (scanner.hasNextLine()) {
+                sb.append(scanner.nextLine());
+            }
+
+            return sb.toString();
+
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+        } finally {
+            if (connection != null) connection.disconnect();
         }
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    is, "UTF-8"), 8);
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            is.close();
-            json = sb.toString();
-        } catch (Exception e) {
-            Log.e("Buffer Error", "Error converting result " + e.toString());
-            return null;
-        }
-        return json;
+        return null;
     }
 }

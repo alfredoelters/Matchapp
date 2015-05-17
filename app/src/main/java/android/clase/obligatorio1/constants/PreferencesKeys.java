@@ -5,4 +5,5 @@ package android.clase.obligatorio1.constants;
  */
 public class PreferencesKeys {
     public static final String PREFS_LEAGUES = "leagues";
+    public static final String PREFS_HOME_MATCHES = "homeMatches";
 }
