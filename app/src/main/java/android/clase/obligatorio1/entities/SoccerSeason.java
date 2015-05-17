@@ -24,7 +24,6 @@ public class SoccerSeason implements Serializable {
     private String leagueTableLink;
 
     public SoccerSeason() {
-
     }
 
     public SoccerSeason(JSONObject json) throws JSONException {
@@ -38,6 +37,10 @@ public class SoccerSeason implements Serializable {
         teamsLink = links.getString(JsonKeys.JSON_TEAMS_LINK);
         fixturesLink = links.getString(JsonKeys.JSON_FIXTURE_LINK);
         leagueTableLink = links.getString(JsonKeys.JSON_LEAGUE_TABLE_LINK);
+    }
+
+    public String toString(){
+        return caption;
     }
 
     public String getCaption() {

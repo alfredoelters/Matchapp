@@ -20,7 +20,7 @@ public class LeagueTable implements Serializable {
 
     public LeagueTable(JSONObject json) throws JSONException {
         if (json != null) {
-            leagueCaption = json.getString(JsonKeys.JSON_CAPTION);
+            leagueCaption = json.getString(JsonKeys.JSON_LEAGUE_CAPTION);
             standings = new ArrayList<>();
             JSONArray standingsJson = json.getJSONArray(JsonKeys.JSON_STANDING);
             JSONObject standing;

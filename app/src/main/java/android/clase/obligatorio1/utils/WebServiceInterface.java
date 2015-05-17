@@ -40,10 +40,17 @@ public class WebServiceInterface {
     }
 
     //------------SoccerSeasons methods------------
-    public List<SoccerSeason> getSoccerSeasons(){
-        JSONArray response = WebServiceUtils.getJSONArrayFromUrl(WebServiceURLs.GET_ALL_SOCCER_SEASONS);
-        return null;
+
+    public  String getSoccerSeasonsJSON(){
+        return WebServiceUtils.getJSONStringFromUrl(WebServiceURLs.GET_ALL_SOCCER_SEASONS);
     }
+
+    public List<SoccerSeason> getSoccerSeasons() {
+        ArrayList<SoccerSeason> result = new ArrayList<>();
+        String json = getSoccerSeasonsJSON();
+        return result;
+    }
+
 
     //----------------Teams methods----------------
 
@@ -84,6 +91,27 @@ public class WebServiceInterface {
     }
 
     /**
+     * Method to get all fixtures played on particular date as a JSON String. If the parameter
+     * soccerSeasonId is specified, it filters the results to that particular soccer season
+     *
+     * @param date
+     * @param soccerSeasonId
+     * @return List of selected fixtures
+     */
+    public String getFixturesJSONForDate(Date date, Integer soccerSeasonId) {
+        String request;
+        String dateString = RESPONSE_DATE_FORMAT.format(date);
+        if (soccerSeasonId == null) {
+            request = String.format(WebServiceURLs.GET_FIXTURES_OF_DATE_FOR_ALL_LEAGUES,
+                    dateString, dateString);
+        } else {
+            request = String.format(WebServiceURLs.GET_FIXTURES_OF_DATE_FOR_LEAGUE, soccerSeasonId,
+                    dateString, dateString);
+        }
+        return WebServiceUtils.getJSONStringFromUrl(request);
+    }
+
+    /**
      * Method to get all fixtures played on particular date. If the parameter
      * soccerSeasonId is specified, it filters the results to that particular soccer season
      *
@@ -92,18 +120,13 @@ public class WebServiceInterface {
      * @return List of selected fixtures
      */
     public List<Match> getFixturesForDate(Date date, Integer soccerSeasonId) {
-        String request;
-        String dateString = RESPONSE_DATE_FORMAT.format(date);
-        if (soccerSeasonId == null) {
-            request = String.format(WebServiceURLs.GET_FIXTURES_OF_DATE_FOR_ALL_LEAGUES, dateString, dateString);
-        } else {
-            request = String.format(WebServiceURLs.GET_FIXTURES_OF_DATE_FOR_LEAGUE, soccerSeasonId,
-                    dateString, dateString);
-        }
-        JSONObject response = WebServiceUtils.getJSONObjectFromUrl(request);
+        String response = getFixturesJSONForDate(date, soccerSeasonId);
+        if (response == null)
+            return null;
+        JSONObject responseJSON = WebServiceUtils.getJSONObjectFromUrl(response);
         List<Match> result;
         try {
-            JSONArray fixturesJson = response.getJSONArray(JsonKeys.JSON_FIXTURES);
+            JSONArray fixturesJson = responseJSON.getJSONArray(JsonKeys.JSON_FIXTURES);
             result = new ArrayList<>();
             JSONObject fixture;
             for (int i = 0; i < fixturesJson.length(); i++) {

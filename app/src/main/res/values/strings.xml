@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">Matchapp</string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <!--Splash Screen -->
+    <string name="alertErrorTittle"> Load Error </string>
+    <string name="alertError">Could not load requested data.</string>
+    <string name="connectionTimeoutTittle">Connection Timeout</string>
+    <string name="connectionTimeout">Please check your internet connection</string>
+    <string name="retry">Retry</string>
+
 </resources>
