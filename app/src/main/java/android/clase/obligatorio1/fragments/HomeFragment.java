@@ -3,9 +3,10 @@ package android.clase.obligatorio1.fragments;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.constants.JsonKeys;
 import android.clase.obligatorio1.constants.PreferencesKeys;
+import android.clase.obligatorio1.constants.WebServiceURLs;
 import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.SoccerSeason;
-import android.content.Context;
+import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,11 +16,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.HeaderViewListAdapter;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -37,6 +39,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -59,14 +62,9 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private List<SoccerSeason> mLeagues;
 
     /**
-     * List of all today's matches
-     */
-    private List<Match> mMatches;
-
-    /**
      * Variable to store the LoadMatchesTask in case it needs to be canceled
      */
-    private LoadMatchesTask mLoadMatchesTask;
+    private List<FetchMatchesTask> mFetchMatchesTasks;
 
     /**
      * Variable to store the LoadLeaguesTask in case it needs to be canceled
@@ -78,7 +76,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         super.onCreate(savedInstanceState);
         mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mLeagues = new ArrayList<>();
-        mMatches = new ArrayList<>();
+        mFetchMatchesTasks = new ArrayList<>();
     }
 
     @Override
@@ -93,17 +91,19 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
 
         // ------ Setup matches listView  -----
         mHomeListView = (ObservableListView) v.findViewById(R.id.homeListView);
+        // add toolbar padding
+        mHomeListView.addHeaderView(inflater.inflate(R.layout.padding, mHomeListView, false));
+        // add toolbar padding
+        mHomeListView.addHeaderView(inflater.inflate(R.layout.padding, mHomeListView, false));
         mHomeListView.setDivider(null);
         mHomeListView.setDividerHeight(15);
-        mHomeListView.setAdapter(new MatchesAdapter(mMatches));
+        mHomeListView.setAdapter(new SoccerSeasonMatchesAdapter(mLeagues));
         mHomeListView.setScrollViewCallbacks(this);
 
         // ------ Start async tasks to load data into memory  -----
         //By using the executeOnExecutor method the asyncTasks run concurrently
         mLoadLeaguesTask = new LoadLeaguesTask();
         mLoadLeaguesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        mLoadMatchesTask = new LoadMatchesTask();
-        mLoadMatchesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         mHeaderView = v.findViewById(R.id.header);
         ViewCompat.setElevation(mHeaderView, getResources().getDimension(R.dimen.toolbar_elevation));
         mToolbarView = v.findViewById(R.id.toolbar);
@@ -114,11 +114,14 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //Finish all running asynctasks
         if (mLoadLeaguesTask != null && mLoadLeaguesTask.getStatus() != AsyncTask.Status.FINISHED) {
             mLoadLeaguesTask.cancel(true);
         }
-        if (mLoadMatchesTask != null && mLoadMatchesTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mLoadMatchesTask.cancel(true);
+        for (FetchMatchesTask task : mFetchMatchesTasks) {
+            if (task != null && task.getStatus() != AsyncTask.Status.FINISHED) {
+                task.cancel(true);
+            }
         }
     }
 
@@ -166,6 +169,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             }
         }
     }
+
     private boolean toolbarIsShown() {
         return ViewHelper.getTranslationY(mHeaderView) == 0;
     }
@@ -187,7 +191,18 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         int toolbarHeight = mToolbarView.getHeight();
         if (headerTranslationY != -toolbarHeight) {
             com.nineoldandroids.view.ViewPropertyAnimator.animate(mHeaderView).cancel();
-            com.nineoldandroids.view.ViewPropertyAnimator.animate(mHeaderView).translationY(-toolbarHeight).setDuration(200).start();
+            com.nineoldandroids.view.ViewPropertyAnimator.animate(mHeaderView)
+                    .translationY(-toolbarHeight).setDuration(200).start();
+        }
+    }
+
+    private void startFetchMatchesTasks() {
+        FetchMatchesTask task;
+        for (int i = 1; i < mLeagues.size(); i++) {
+            task = new FetchMatchesTask();
+            mFetchMatchesTasks.add(task);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                    mLeagues.get(i).getSelfLink(), i + "");
         }
     }
 
@@ -217,19 +232,36 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         @Override
         protected void onPostExecute(List<SoccerSeason> soccerSeasons) {
             super.onPostExecute(soccerSeasons);
+            //Dummy league to show all leagues in the filter
+            SoccerSeason dummyLeague = new SoccerSeason();
+//            dummyLeague.setCaption(getResources().getString(R.string.all_leagues));
+//            mLeagues.add(dummyLeague);
             mLeagues.addAll(soccerSeasons);
             ((ArrayAdapter<SoccerSeason>) mLeaguesSpinner.getAdapter()).notifyDataSetChanged();
+            startFetchMatchesTasks();
         }
     }
 
     /**
      * Async task to load matches fetches by the splash screen into memory
      */
-    private class LoadMatchesTask extends AsyncTask<Void, Void, List<Match>> {
+    private class FetchMatchesTask extends AsyncTask<String, Void, List<Match>> {
+        private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        private int soccerSeasonPositionInList;
 
         @Override
-        protected List<Match> doInBackground(Void... params) {
-            String matchesJson = mPreferences.getString(PreferencesKeys.PREFS_HOME_MATCHES, null);
+        protected List<Match> doInBackground(String... params) {
+            String soccerSeasonLink = params[0];
+            soccerSeasonPositionInList = Integer.parseInt(params[1]);
+            //Fixed date for debug purposes
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH,17);
+            calendar.set(Calendar.MONTH,4);
+            calendar.set(Calendar.YEAR, 2015);
+            String dateFormatted = dateFormat.format(calendar.getTime());
+            String matchesJson = WebServiceUtils.getJSONStringFromUrl(soccerSeasonLink
+                    + String.format(WebServiceURLs.INCOMPLETE_GET_FIXTURES_OF_DATE_FOR_LEAGUE,
+                    dateFormatted, dateFormatted));
             List<Match> result = new ArrayList<>();
             if (matchesJson != null) {
                 try {
@@ -252,19 +284,19 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         @Override
         protected void onPostExecute(List<Match> matches) {
             super.onPostExecute(matches);
-            mMatches.addAll(matches);
-            ((MatchesAdapter) mHomeListView.getAdapter()).notifyDataSetChanged();
+            mLeagues.get(soccerSeasonPositionInList).getMatches().addAll(matches);
+            ((SoccerSeasonMatchesAdapter) ((HeaderViewListAdapter) mHomeListView.getAdapter())
+                    .getWrappedAdapter()).notifyDataSetChanged();
         }
     }
 
-    private class LeaguesAdapter extends ArrayAdapter<SoccerSeason>{
+    private class LeaguesAdapter extends ArrayAdapter<SoccerSeason> {
 
-        public LeaguesAdapter( List<SoccerSeason> leagues) {
-            super(getActivity(),0,leagues);
+        public LeaguesAdapter(List<SoccerSeason> leagues) {
+            super(getActivity(), 0, leagues);
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        private View getCustomView(int position, View convertView) {
             if (convertView == null) {
                 convertView = getActivity().getLayoutInflater()
                         .inflate(R.layout.league_spinner_item, null);
@@ -274,50 +306,60 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             leagueNameTextView.setText(league.getCaption());
             return convertView;
         }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return getCustomView(position, convertView);
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            return getCustomView(position, convertView);
+        }
     }
 
     /**
      * Array adapter to show today's matches
      */
-    private class MatchesAdapter extends ArrayAdapter<Match> {
+    private class SoccerSeasonMatchesAdapter extends ArrayAdapter<SoccerSeason> {
 
         private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         private final DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
-        private String lastSeasonName;
 
-        public MatchesAdapter(List<Match> matches) {
-            super(getActivity(), 0, matches);
-            lastSeasonName = "";
+        public SoccerSeasonMatchesAdapter(List<SoccerSeason> leagues) {
+            super(getActivity(), 0, leagues);
         }
 
-
-        private View getCustomView(int position, View convertView){
-            if (convertView == null) {
-                convertView = getActivity().getLayoutInflater()
-                        .inflate(R.layout.home_match_list_item, null);
-            }
-            TextView separatorTextView = (TextView) convertView.findViewById(R.id.separator);
-            TextView dateTextView = (TextView) convertView.findViewById(R.id.matchDateTextView);
-            TextView timeTextView = (TextView) convertView.findViewById(R.id.matchTimeTextView);
-            TextView awayTeamTextView = (TextView) convertView.findViewById(R.id.matchAwayTeamTextView);
-            TextView homeTeamTextView = (TextView) convertView.findViewById(R.id.matchHomeTeamTextView);
-
-            Match match = getItem(position);
-            Date date = match.getDate();
-            dateTextView.setText(dateFormat.format(date));
-            timeTextView.setText(timeFormat.format(date));
-            awayTeamTextView.setText(match.getAwayTeamName());
-            homeTeamTextView.setText(match.getHomeTeamName());
-            return convertView;
-        }
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position,convertView);
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position,convertView);
+            if (convertView == null) {
+                convertView = getActivity().getLayoutInflater()
+                        .inflate(R.layout.soccer_season_match_list, null);
+            }
+            LinearLayout matchesList = (LinearLayout) convertView
+                    .findViewById(R.id.matchesLinearLayout);
+            TextView separator = (TextView) convertView.findViewById(R.id.separator);
+            SoccerSeason league = getItem(position);
+            separator.setText(league.getCaption());
+            LayoutInflater li = getActivity().getLayoutInflater();
+            for (Match match : league.getMatches()) {
+                View matchView = li.inflate(R.layout.home_match_list_item, null);
+                TextView matchDateTextView = (TextView) matchView
+                        .findViewById(R.id.matchDateTextView);
+                TextView matchTimeTextView = (TextView) matchView
+                        .findViewById(R.id.matchTimeTextView);
+                TextView matchAwayTeamTextView = (TextView) matchView
+                        .findViewById(R.id.matchAwayTeamTextView);
+                TextView matchHomeTeamTextView = (TextView) matchView
+                        .findViewById(R.id.matchHomeTeamTextView);
+                Date date = match.getDate();
+                matchDateTextView.setText(dateFormat.format(date));
+                matchTimeTextView.setText(timeFormat.format(date));
+                matchAwayTeamTextView.setText(match.getAwayTeamName());
+                matchHomeTeamTextView.setText(match.getHomeTeamName());
+                matchesList.addView(matchView);
+            }
+            return convertView;
         }
     }
 

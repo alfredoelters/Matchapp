@@ -6,6 +6,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * created by Alfredo El Ters and Mathias Cabano on 09/05/15.
@@ -23,23 +25,27 @@ public class SoccerSeason implements Serializable {
     private String fixturesLink;
     private String leagueTableLink;
 
+    private List<Match> matches;
+
     public SoccerSeason() {
+        matches = new ArrayList<>();
     }
 
     public SoccerSeason(JSONObject json) throws JSONException {
+        matches = new ArrayList<>();
         caption = json.getString(JsonKeys.JSON_CAPTION);
         league = json.getString(JsonKeys.JSON_LEAGUE);
         year = json.getString(JsonKeys.JSON_YEAR);
         numberOfTeams = json.getInt(JsonKeys.JSON_NUMBER_OF_TEAMS);
         numberOfGames = json.getInt(JsonKeys.JSON_NUMBER_OF_GAMES);
         JSONObject links = json.getJSONObject(JsonKeys.JSON_LINKS);
-        selfLink = links.getString(JsonKeys.JSON_SELF_LINK);
-        teamsLink = links.getString(JsonKeys.JSON_TEAMS_LINK);
-        fixturesLink = links.getString(JsonKeys.JSON_FIXTURE_LINK);
-        leagueTableLink = links.getString(JsonKeys.JSON_LEAGUE_TABLE_LINK);
+        selfLink = links.getJSONObject(JsonKeys.JSON_SELF_LINK).getString(JsonKeys.JSON_HREF);
+        teamsLink = links.getJSONObject(JsonKeys.JSON_TEAMS_LINK).getString(JsonKeys.JSON_HREF);
+        fixturesLink = links.getJSONObject(JsonKeys.JSON_FIXTURE_LINK).getString(JsonKeys.JSON_HREF);
+        leagueTableLink = links.getJSONObject(JsonKeys.JSON_LEAGUE_TABLE_LINK).getString(JsonKeys.JSON_HREF);
     }
 
-    public String toString(){
+    public String toString() {
         return caption;
     }
 
@@ -113,5 +119,13 @@ public class SoccerSeason implements Serializable {
 
     public void setLeagueTableLink(String leagueTableLink) {
         this.leagueTableLink = leagueTableLink;
+    }
+
+    public List<Match> getMatches() {
+        return matches;
+    }
+
+    public void setMatches(List<Match> matches) {
+        this.matches = matches;
     }
 }

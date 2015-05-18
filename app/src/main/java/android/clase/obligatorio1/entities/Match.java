@@ -28,6 +28,8 @@ public class Match implements Serializable {
     private Integer goalsHomeTeam;
     private Integer goalsAwayTeam;
 
+    private String selfLink;
+
     public Match(JSONObject json) throws JSONException, ParseException {
         if (json != null) {
             date = responseDateFormat.parse(json.getString(JsonKeys.JSON_DATE));
@@ -36,6 +38,8 @@ public class Match implements Serializable {
             JSONObject result = json.getJSONObject(JsonKeys.JSON_RESULT);
             goalsHomeTeam = result.getInt(JsonKeys.JSON_GOALS_HOME_TEAM);
             goalsAwayTeam = result.getInt(JsonKeys.JSON_GOALS_AWAY_TEAM);
+            selfLink = json.getJSONObject(JsonKeys.JSON_LINKS)
+                    .getJSONObject(JsonKeys.JSON_SELF_LINK).getString(JsonKeys.JSON_HREF);
         }
     }
 
@@ -77,5 +81,13 @@ public class Match implements Serializable {
 
     public void setGoalsAwayTeam(Integer goalsAwayTeam) {
         this.goalsAwayTeam = goalsAwayTeam;
+    }
+
+    public String getSelfLink() {
+        return selfLink;
+    }
+
+    public void setSelfLink(String selfLink) {
+        this.selfLink = selfLink;
     }
 }

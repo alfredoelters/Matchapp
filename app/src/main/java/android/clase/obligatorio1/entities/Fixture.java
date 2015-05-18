@@ -52,6 +52,8 @@ public class Fixture implements Serializable {
             goalsHomeTeam = result.getInt(JsonKeys.JSON_GOALS_HOME_TEAM);
             goalsAwayTeam = result.getInt(JsonKeys.JSON_GOALS_AWAY_TEAM);
             head2Head = new Head2Head(json.getJSONObject(JsonKeys.JSON_HEAD_TO_HEAD));
+            selfLink = json.getJSONObject(JsonKeys.JSON_LINKS)
+                    .getJSONObject(JsonKeys.JSON_SELF_LINK).getString(JsonKeys.JSON_HREF);
         }
     }
 

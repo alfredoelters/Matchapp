@@ -7,6 +7,7 @@ package android.clase.obligatorio1.constants;
 public class JsonKeys {
 
     //Links to get other entities
+    public static final String JSON_HREF = "href";
     public static final String JSON_LINKS = "_links";
     public static final String JSON_SELF_LINK = "self";
     public static final String JSON_SOCCER_SEASON_LINK = "homeTeam";

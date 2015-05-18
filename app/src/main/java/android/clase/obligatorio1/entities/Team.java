@@ -35,9 +35,9 @@ public class Team implements Serializable {
         crestURL = json.getString(JsonKeys.JSON_CREST_URL);
         squadMarketValue = json.getString(JsonKeys.JSON_MARKET_VALUE);
         JSONObject links = json.getJSONObject(JsonKeys.JSON_LINKS);
-        selfLink = links.getString(JsonKeys.JSON_SELF_LINK);
-        fixturesLink = links.getString(JsonKeys.JSON_FIXTURES_LINK);
-        playersLink = links.getString(JsonKeys.JSON_PLAYERS_LINK);
+        selfLink = links.getJSONObject(JsonKeys.JSON_SELF_LINK).getString(JsonKeys.JSON_HREF);
+        fixturesLink = links.getJSONObject(JsonKeys.JSON_FIXTURES_LINK).getString(JsonKeys.JSON_HREF);
+        playersLink = links.getJSONObject(JsonKeys.JSON_PLAYERS_LINK).getString(JsonKeys.JSON_HREF);
     }
 
     public String getName() {

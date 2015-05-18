@@ -36,6 +36,11 @@ public class WebServiceURLs {
     public static final String GET_FIXTURES_OF_DATE_FOR_LEAGUE = WEB_SERVICE_ENDPOINT +
             "soccerseasons/%d/fixtures/?timeFrameStart=%s&timeFrameEnd=%s";
 
+    //This link needs to be added to the soccerseason link
+    // //E.g. = GET http://api.football­data.org/alpha/fixtures/?timeFrameStart=2015­04­18&timeFrameEnd=2015­04­18
+    public  static final String INCOMPLETE_GET_FIXTURES_OF_DATE_FOR_LEAGUE =
+            "/fixtures/?timeFrameStart=%s&timeFrameEnd=%s";
+
     //----------------League Table WS methods----------------
 
     //E.g. = GET http://api.football-data.org/alpha/soccerseasons/357/leagueTable

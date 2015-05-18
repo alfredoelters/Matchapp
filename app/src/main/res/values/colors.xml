@@ -2,4 +2,6 @@
 <resources>
     <item name="white" type="color">#ffff</item>
     <item name="skyblue" type="color">#ff00abac</item>
+    <item name="dark_skyblue" type="color">#ff008f90</item>
+    <item name="accent_skyblue" type="color">#ff00cdce</item>
 </resources>

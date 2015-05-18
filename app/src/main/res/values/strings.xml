@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Matchapp</string>
+    <string name="app_name">MatchApp</string>
 
     <!--Splash Screen -->
     <string name="alertErrorTittle"> Load Error </string>
@@ -7,4 +7,8 @@
     <string name="connectionTimeoutTittle">Connection Timeout</string>
     <string name="connectionTimeout">Please check your internet connection</string>
     <string name="retry">Retry</string>
+
+    <!--Home Screen -->
+    <string name="all_leagues">All leagues</string>
+    <string name="vs">VS</string>
 </resources>
