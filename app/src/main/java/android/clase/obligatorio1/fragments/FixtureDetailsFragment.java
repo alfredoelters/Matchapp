@@ -31,9 +31,7 @@ public class FixtureDetailsFragment extends Fragment {
     private static final DateFormat MATCH_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     private static final DateFormat MATCH_TIME_FORMAT = new SimpleDateFormat("hh:mm a");
 
-    private String mMatchUrl;
-    private String mLeagueName;
-    private Fixture mFixture;
+    //UI components
     private TextView mMatchDayTextView;
     private TextView mMatchDateTextView;
     private TextView mMatchStatusTextView;
@@ -44,6 +42,20 @@ public class FixtureDetailsFragment extends Fragment {
     private TextView mAwayTeamScoreTextView;
     private Toolbar mToolbar;
 
+    /**
+     * Match Url obtained from the HomeActivity
+     */
+    private String mMatchUrl;
+    /**
+     * League name obtained from the HomeActivity
+     */
+    private String mLeagueName;
+
+    /**
+     * Fixture fetched  by the async task
+     */
+    private Fixture mFixture;
+
     private FetchFixtureTask mFetchFixtureTask;
 
     @Override
@@ -52,6 +64,7 @@ public class FixtureDetailsFragment extends Fragment {
         Intent homeScreenIntent = getActivity().getIntent();
         mMatchUrl = homeScreenIntent.getExtras().getString(HomeFragment.EXTRA_MATCH_URL);
         mLeagueName = homeScreenIntent.getExtras().getString(HomeFragment.EXTRA_LEAGUE_NAME);
+        mFetchFixtureTask = new FetchFixtureTask();
     }
 
     @Nullable
@@ -66,7 +79,6 @@ public class FixtureDetailsFragment extends Fragment {
         mHomeTeamScoreTextView = (TextView) v.findViewById(R.id.homeTeamScoreTextView);
         mAwayTeamTextView = (TextView) v.findViewById(R.id.awayTeamTextView);
         mAwayTeamScoreTextView = (TextView) v.findViewById(R.id.awayTeamTextView);
-        mFetchFixtureTask = new FetchFixtureTask();
         mFetchFixtureTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar);
         mToolbar.setTitle(mLeagueName);
@@ -90,6 +102,15 @@ public class FixtureDetailsFragment extends Fragment {
         mAwayTeamTextView.setText(mFixture.getAwayTeam().getName());
         //Need to transform the value to a string
         mAwayTeamScoreTextView.setText(mFixture.getGoalsAwayTeam()+"");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //Finish all running async tasks
+        if (mFetchFixtureTask != null && mFetchFixtureTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mFetchFixtureTask.cancel(true);
+        }
     }
 
     private class FetchFixtureTask extends AsyncTask<Void, Void, Fixture> {

@@ -24,6 +24,10 @@
         <activity
             android:parentActivityName=".activities.HomeActivity"
             android:name=".activities.FixtureDetailsActivity"/>
+
+        <activity
+            android:parentActivityName=".activities.HomeActivity"
+            android:name=".activities.LeagueTableActivity"/>
     </application>
 
 </manifest>

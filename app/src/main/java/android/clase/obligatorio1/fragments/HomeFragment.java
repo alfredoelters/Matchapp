@@ -2,6 +2,8 @@ package android.clase.obligatorio1.fragments;
 
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.activities.FixtureDetailsActivity;
+import android.clase.obligatorio1.activities.LeagueTableActivity;
+import android.clase.obligatorio1.activities.TeamDetailsActivity;
 import android.clase.obligatorio1.constants.JsonKeys;
 import android.clase.obligatorio1.constants.PreferencesKeys;
 import android.clase.obligatorio1.constants.WebServiceURLs;
@@ -19,6 +21,9 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -50,18 +55,24 @@ import java.util.List;
  * Created by Alfredo El Ters and Mathias Cabano on 15/05/15.
  */
 public class HomeFragment extends Fragment implements ObservableScrollViewCallbacks {
-    //Extra key to send the match url to the FixtureDetailsFragment
+    //Extra keys
     public static final String EXTRA_MATCH_URL = "matchUrl";
+    public static final String EXTRA_LEAGUE_TABLE_URL = "leagueTableUrl";
     public static final String EXTRA_LEAGUE_NAME = "leagueName";
 
-    private SharedPreferences mPreferences;
-    private View mHeaderView;
-    private View mToolbarView;
-
-    private int mBaseTranslationY;
-
+    //UI components
     private Spinner mLeaguesSpinner;
     private ObservableListView mHomeListView;
+    private View mHeaderView;
+    private Toolbar mToolbar;
+
+    /**
+     * int to specify the translation of the toolbar based on the scrolling
+     */
+    private int mBaseTranslationY;
+
+    private SharedPreferences mPreferences;
+
 
     /**
      * List of all the leagues
@@ -78,14 +89,13 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
      */
     private LoadLeaguesTask mLoadLeaguesTask;
 
-    private int mSelectedLeaguePosition;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mLeagues = new ArrayList<>();
         mFetchMatchesTasks = new ArrayList<>();
+        mLoadLeaguesTask = new LoadLeaguesTask();
     }
 
     @Override
@@ -115,9 +125,9 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //TODO make filter
-                View matchView;
-                SoccerSeasonMatchesAdapter adapter = (SoccerSeasonMatchesAdapter)
-                        ((HeaderViewListAdapter) mHomeListView.getAdapter()).getWrappedAdapter();
+//                View matchView;
+//                SoccerSeasonMatchesAdapter adapter = (SoccerSeasonMatchesAdapter)
+//                        ((HeaderViewListAdapter) mHomeListView.getAdapter()).getWrappedAdapter();
 //                for (int i = 0;i<adapter.getCount();i++) {
 //                    matchView = adapter.getView(i,mHomeListView,null);
 //                    //Show or hide league depending on the position selected
@@ -126,8 +136,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
 //                    else
 //                        matchView.setVisibility(View.GONE);
 //                }
-                mSelectedLeaguePosition = position;
-                adapter.notifyDataSetChanged();
+//                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -137,13 +146,38 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         });
         // ------ Start async tasks to load data into memory  -----
         //By using the executeOnExecutor method the asyncTasks run concurrently
-        mLoadLeaguesTask = new LoadLeaguesTask();
         mLoadLeaguesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         mHeaderView = v.findViewById(R.id.header);
         ViewCompat.setElevation(mHeaderView, getResources().getDimension(R.dimen.toolbar_elevation));
-        mToolbarView = v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar((Toolbar) v.findViewById(R.id.toolbar));
+        mToolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        setHasOptionsMenu(true);
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_home,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.viewLeagueTableAction:
+                //Call leagueTableActivity with the selected league url and name
+                Intent intent = new Intent(getActivity(), LeagueTableActivity.class);
+                SoccerSeason selectedLeague = ((SoccerSeason)mLeaguesSpinner
+                        .getSelectedItem());
+                intent.putExtra(EXTRA_LEAGUE_TABLE_URL, selectedLeague.getLeagueTableLink());
+                intent.putExtra(EXTRA_LEAGUE_NAME, selectedLeague.getCaption());
+                startActivity(intent);
+                return true;
+            case R.id.searchLeagueAction:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -163,7 +197,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     @Override
     public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {
         if (dragging) {
-            int toolbarHeight = mToolbarView.getHeight();
+            int toolbarHeight = mToolbar.getHeight();
             if (firstScroll) {
                 float currentHeaderTranslationY = ViewHelper.getTranslationY(mHeaderView);
                 if (-toolbarHeight < currentHeaderTranslationY) {
@@ -188,7 +222,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         if (scrollState == ScrollState.DOWN) {
             showToolbar();
         } else if (scrollState == ScrollState.UP) {
-            int toolbarHeight = mToolbarView.getHeight();
+            int toolbarHeight = mToolbar.getHeight();
             int scrollY = mHomeListView.getCurrentScrollY();
             if (toolbarHeight <= scrollY) {
                 hideToolbar();
@@ -210,7 +244,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     }
 
     private boolean toolbarIsHidden() {
-        return ViewHelper.getTranslationY(mHeaderView) == -mToolbarView.getHeight();
+        return ViewHelper.getTranslationY(mHeaderView) == -mToolbar.getHeight();
     }
 
     private void showToolbar() {
@@ -223,7 +257,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
 
     private void hideToolbar() {
         float headerTranslationY = ViewHelper.getTranslationY(mHeaderView);
-        int toolbarHeight = mToolbarView.getHeight();
+        int toolbarHeight = mToolbar.getHeight();
         if (headerTranslationY != -toolbarHeight) {
             com.nineoldandroids.view.ViewPropertyAnimator.animate(mHeaderView).cancel();
             com.nineoldandroids.view.ViewPropertyAnimator.animate(mHeaderView)
