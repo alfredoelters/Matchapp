@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="white" type="color">#ffff</item>
+    <item name="black" type="color">#000</item>
     <item name="skyblue" type="color">#ff00abac</item>
+    <item name="gray" type="color">#ffa2a2a2</item>
     <item name="dark_skyblue" type="color">#ff008f90</item>
-    <item name="accent_skyblue" type="color">#ff00cdce</item>
+    <item name="accent_skyblue" type="color">#ffc8fffd</item>
 </resources>

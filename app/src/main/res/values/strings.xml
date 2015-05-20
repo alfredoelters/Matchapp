@@ -11,4 +11,11 @@
     <!--Home Screen -->
     <string name="all_leagues">All leagues</string>
     <string name="vs">VS</string>
+
+    <!--Fixture Details Screen -->
+    <string name="home">Home</string>
+    <string name="away">Away</string>
+    <string name="head2head">Head to Head</string>
+    <string name="matchDay">Matchday</string>
+    <string name="startTime">Start time</string>
 </resources>

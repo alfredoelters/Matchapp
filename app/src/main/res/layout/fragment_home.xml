@@ -1,5 +1,4 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -18,12 +17,7 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/skyblue"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="@style/ToolbarTheme"
-            app:popupTheme="@style/Theme.AppCompat.Light.DarkActionBar">
+            style="@style/toolbarStyle">
 
             <SearchView xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="wrap_content"
@@ -32,6 +26,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_height="wrap_content"
                 android:hint="@string/app_name" />
+
+
         </android.support.v7.widget.Toolbar>
         <Spinner
             android:id="@+id/leaguesSpinner"

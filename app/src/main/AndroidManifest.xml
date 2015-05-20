@@ -19,8 +19,10 @@
         <activity
             android:name=".activities.HomeActivity"/>
         <activity
+            android:parentActivityName=".activities.FixtureDetailsActivity"
             android:name=".activities.TeamDetailsActivity"/>
         <activity
+            android:parentActivityName=".activities.HomeActivity"
             android:name=".activities.FixtureDetailsActivity"/>
     </application>
 

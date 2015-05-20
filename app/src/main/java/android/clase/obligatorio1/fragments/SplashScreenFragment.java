@@ -1,7 +1,6 @@
 package android.clase.obligatorio1.fragments;
 
 import android.app.AlertDialog;
-
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.activities.HomeActivity;
 import android.clase.obligatorio1.constants.PreferencesKeys;
@@ -19,8 +18,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -62,8 +59,6 @@ public class SplashScreenFragment extends Fragment {
      * Task used to fetch today's matches data
      */
 //    private FetchMatchesTask mFetchMatchesTask;
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -157,9 +152,11 @@ public class SplashScreenFragment extends Fragment {
      */
     private void alertLoadError() {
         stopTasks();
-        mAlertDialog.setTitle(R.string.alertErrorTittle);
-        mAlertDialog.setMessage(getString(R.string.alertError));
-        mAlertDialog.show();
+        if (isAdded()) {
+            mAlertDialog.setTitle(R.string.alertErrorTittle);
+            mAlertDialog.setMessage(getString(R.string.alertError));
+            mAlertDialog.show();
+        }
     }
 
     /**
@@ -167,9 +164,11 @@ public class SplashScreenFragment extends Fragment {
      */
     private void alertConnectionTimeout() {
         stopTasks();
-        mAlertDialog.setTitle(R.string.connectionTimeoutTittle);
-        mAlertDialog.setMessage(getString(R.string.connectionTimeout));
-        mAlertDialog.show();
+        if (isAdded()) {
+            mAlertDialog.setTitle(R.string.connectionTimeoutTittle);
+            mAlertDialog.setMessage(getString(R.string.connectionTimeout));
+            mAlertDialog.show();
+        }
     }
 
     /**
@@ -188,7 +187,7 @@ public class SplashScreenFragment extends Fragment {
 //                mLoadedLeagues = true;
                 mPreferences.edit().putString(PreferencesKeys.PREFS_LEAGUES, leaguesJson).commit();
 //                if (mLoadedMatches)
-                    startHomeActivity();
+                startHomeActivity();
             } else {
                 alertLoadError();
             }
