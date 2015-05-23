@@ -15,12 +15,16 @@ import java.util.List;
  * Class to represent the positions table of a league returned by the Web Service.
  */
 public class LeagueTable implements Serializable {
+    private String selfLink;
+
     private String leagueCaption;
     private List<LeagueTableStanding> standings;
 
     public LeagueTable(JSONObject json) throws JSONException {
         if (json != null) {
             leagueCaption = json.getString(JsonKeys.JSON_LEAGUE_CAPTION);
+            selfLink = json.getJSONObject(JsonKeys.JSON_LINKS)
+                    .getString(JsonKeys.JSON_SELF_LINK);
             standings = new ArrayList<>();
             JSONArray standingsJson = json.getJSONArray(JsonKeys.JSON_STANDING);
             JSONObject standing;

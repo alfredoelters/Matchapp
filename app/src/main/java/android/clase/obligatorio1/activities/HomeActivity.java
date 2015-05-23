@@ -12,4 +12,5 @@ public class HomeActivity extends SingleFragmentActivity {
     protected Fragment createFragment() {
         return new HomeFragment();
     }
+
 }

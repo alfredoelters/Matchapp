@@ -23,7 +23,7 @@ public class LeagueTableStanding implements Serializable {
 
     public LeagueTableStanding(JSONObject json) throws JSONException {
         if (json != null) {
-            position = json.getInt(JsonKeys.JSON_POINTS);
+            position = json.getInt(JsonKeys.JSON_POSITION);
             teamName = json.getString(JsonKeys.JSON_TEAM_NAME);
             playedGames = json.getInt(JsonKeys.JSON_PLAYED_GAMES);
             points = json.getInt(JsonKeys.JSON_POINTS);

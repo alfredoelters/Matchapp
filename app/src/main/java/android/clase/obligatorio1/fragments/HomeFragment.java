@@ -1,6 +1,5 @@
 package android.clase.obligatorio1.fragments;
 
-import android.app.SearchManager;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.activities.FixtureDetailsActivity;
 import android.clase.obligatorio1.activities.LeagueTableActivity;
@@ -8,7 +7,6 @@ import android.clase.obligatorio1.constants.JsonKeys;
 import android.clase.obligatorio1.constants.PreferencesKeys;
 import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.SoccerSeason;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -28,6 +26,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.HeaderViewListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -89,6 +89,9 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
      */
     private List<Match> mAllMatches;
 
+    /**
+     * HashMap to set match's league caption
+     */
     private HashMap<String, String> mLeagueCaptions;
 
     /**
@@ -141,20 +144,13 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         mLeaguesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //TODO make filter
                 MatchesAdapter adapter = (MatchesAdapter)
                         ((HeaderViewListAdapter) mHomeListView.getAdapter()).getWrappedAdapter();
-                mMatches.clear();
-                for (Match match : mAllMatches) {
-                    if (position == 0 || match.getLeagueCaption().
-                            equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem()).getCaption())) {
-                        mMatches.add(match);
-                    }
-                }
-                if(position == 0){
-                    Collections.sort(mMatches);
-                }
-                adapter.notifyDataSetChanged();
+                //Filter without a query to only take into account the spinner filter.
+                adapter.getFilter().filter(null);
+                //Redraw options menu to hide the viewLeagueTableAction
+                // in case "All leagues" is selected
+                getActivity().invalidateOptionsMenu();
             }
 
             @Override
@@ -165,6 +161,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         // ------ Start async tasks to load data into memory  -----
         //By using the executeOnExecutor method the asyncTasks run concurrently
         mLoadLeaguesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        // ------ Setup  Toolbar  -----
         mHeaderView = v.findViewById(R.id.header);
         ViewCompat.setElevation(mHeaderView, getResources().getDimension(R.dimen.toolbar_elevation));
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar);
@@ -177,12 +175,34 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_home, menu);
-//        SearchManager searchManager =
-//                (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-//        SearchView searchView =
-//                (SearchView) menu.findItem(R.id.searchTeamAction).getActionView();
-//        searchView.setSearchableInfo(
-//                searchManager.getSearchableInfo(getActivity().getComponentName()));
+        //Prepare searchView to query TeamNames
+        SearchView searchView = (SearchView) menu.findItem(R.id.searchTeamAction).getActionView();
+        if (searchView != null) {
+            final Menu menu_block = menu;
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    menu_block.findItem(R.id.searchTeamAction).collapseActionView();
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    ((MatchesAdapter) ((HeaderViewListAdapter) mHomeListView.getAdapter())
+                            .getWrappedAdapter()).getFilter().filter(newText);
+                    return false;
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        //Hide the viewLeagueAction in case "All leagues" is selected
+        if (mLeaguesSpinner.getSelectedItemPosition() == 0)
+            menu.getItem(1).setVisible(false);
     }
 
     @Override
@@ -198,9 +218,44 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                 startActivity(intent);
                 return true;
             case R.id.searchTeamAction:
+                getActivity().onSearchRequested();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    //    public void updateMatchesFilter() {
+//        String query = mPreferences.getString(PreferencesKeys.PREFS_SEARCH_QUERY, null);
+//        if (query != null) {
+//            //Take into account both the league filter and the search filter
+//            int selectedLeaguePosition = mLeaguesSpinner.getSelectedItemPosition();
+//            for (Match match : mAllMatches) {
+//                if (selectedLeaguePosition == 0 || match.getLeagueCaption().
+//                        equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem()).getCaption())) {
+//                    if (match.getHomeTeamName().contains(query) || match.getAwayTeamName().contains(query)) {
+//                        mMatches.add(match);
+//                    }
+//                }
+//            }
+//            ((MatchesAdapter) ((HeaderViewListAdapter) mHomeListView.getAdapter())
+//                    .getWrappedAdapter()).notifyDataSetChanged();
+//        }
+//    }
+
+    public void selectFavoriteLeague(){
+        String favoriteLeagueCaption = mPreferences.getString(PreferencesKeys.PREFS_FAVORITE_LEAGUE,
+                null);
+        if(favoriteLeagueCaption!=null){
+            for(int i = 0;i<mLeagues.size();i++){
+                if(favoriteLeagueCaption.equals(mLeagues.get(i).getCaption())){
+                    mLeaguesSpinner.setSelection(i);
+                    break;
+                }
+            }
+        }else{
+            mLeaguesSpinner.setSelection(0);
         }
     }
 
@@ -372,10 +427,10 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         protected void onPostExecute(List<Match> matches) {
             super.onPostExecute(matches);
             mAllMatches = matches;
-            mMatches.addAll(matches);
-            Collections.sort(mMatches);
-            ((MatchesAdapter) ((HeaderViewListAdapter) mHomeListView.getAdapter())
-                    .getWrappedAdapter()).notifyDataSetChanged();
+            Collections.sort(mAllMatches);
+            mMatches.addAll(mAllMatches);
+            //If there is a favorite league, set the selection as this one.
+            selectFavoriteLeague();
         }
     }
 
@@ -460,7 +515,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     /**
      * Array adapter to show today's matches
      */
-    private class MatchesAdapter extends ArrayAdapter<Match> {
+    private class MatchesAdapter extends ArrayAdapter<Match> implements Filterable {
 
         private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         private final DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
@@ -471,7 +526,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         public MatchesAdapter(List<Match> matches) {
             super(getActivity(), 0, matches);
             lastLeagueCaption = "";
-
         }
 
 
@@ -521,6 +575,51 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             return convertView;
         }
 
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    FilterResults results = new FilterResults();
+                    List<Match> filteredList = new ArrayList<>();
+                    int selectedLeaguePosition = mLeaguesSpinner.getSelectedItemPosition();
+                    // We implement here the filter logic
+                    if (constraint == null || constraint.length() == 0) {
+                        // Only take into account the spinnerFilter
+                        for (Match m : mAllMatches) {
+                            if (selectedLeaguePosition == 0 || m.getLeagueCaption().
+                                    equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem())
+                                            .getCaption())) {
+                                filteredList.add(m);
+                            }
+                        }
+                        results.values = filteredList;
+                        results.count = filteredList.size();
+                    } else {
+                        // Take into account both the league filter and the team filter
+                        for (Match m : mAllMatches) {
+                            if (selectedLeaguePosition == 0 || m.getLeagueCaption().
+                                    equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem()).getCaption())) {
+                                if (m.getAwayTeamName().toUpperCase().startsWith(constraint.toString()
+                                        .toUpperCase()) || m.getHomeTeamName().toUpperCase()
+                                        .startsWith(constraint.toString().toUpperCase()))
+                                    filteredList.add(m);
+                            }
+                        }
+                        results.values = filteredList;
+                        results.count = filteredList.size();
+                    }
+                    return results;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    mMatches.clear();
+                    mMatches.addAll((List<Match>) results.values);
+                    notifyDataSetChanged();
+                }
+            };
+        }
     }
 
 }

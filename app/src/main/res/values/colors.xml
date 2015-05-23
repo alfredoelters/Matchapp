@@ -6,4 +6,6 @@
     <item name="gray" type="color">#ffa2a2a2</item>
     <item name="dark_skyblue" type="color">#ff008f90</item>
     <item name="accent_skyblue" type="color">#ffc8fffd</item>
+    <item name="light_red" type="color">#44ff0200</item>
+    <item name="light_green" type="color">#4c54d43e</item>
 </resources>

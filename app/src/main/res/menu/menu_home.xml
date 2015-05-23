@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/searchTeamAction" android:icon="@android:drawable/ic_menu_search"
-        app:showAsAction="collapseActionView|ifRoom"
-        android:actionViewClass="android.widget.SearchView" android:title="@string/searchLeague"/>
-    <item android:id="@+id/viewLeagueTableAction" android:icon="@android:drawable/ic_menu_sort_by_size"
-        app:showAsAction="ifRoom" android:title="@string/viewLeagueTable"/>
+    <item
+        android:id="@+id/searchTeamAction"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/searchTeam"
+        app:showAsAction="collapseActionView|ifRoom" />
+    <item
+        android:id="@+id/viewLeagueTableAction"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="@string/viewLeagueTable"
+        app:showAsAction="ifRoom" />
 </menu>
