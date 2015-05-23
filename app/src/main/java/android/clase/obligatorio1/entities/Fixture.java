@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * created by Alfredo El Ters and Mathias Cabano on 10/05/15.
@@ -20,6 +21,11 @@ public class Fixture implements Serializable {
      * Format in which the WS sends the dates for this request
      */
     private static final DateFormat responseDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
+
+    //The date returned by the WebService is in the standard GTM timezone
+    static {
+        responseDateFormat.setTimeZone(TimeZone.getTimeZone("Etc/GTM-0"));
+    }
 
     private Integer goalsHomeTeam;
     private Integer goalsAwayTeam;

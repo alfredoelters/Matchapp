@@ -223,7 +223,7 @@ public class LeagueTableFragment extends Fragment {
             if (standing.getPosition() <= 4) {
                 convertView.setBackgroundColor(getResources().getColor(R.color.light_green));
             } else {
-                if (standing.getPosition() >= mTotalStandings.size() - 3) {
+                if (standing.getPosition() > mTotalStandings.size() - 3) {
                     convertView.setBackgroundColor(getResources().getColor(R.color.light_red));
                 } else {
                     convertView.setBackgroundColor(Color.TRANSPARENT);

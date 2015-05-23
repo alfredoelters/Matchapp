@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -23,6 +24,11 @@ public class Match implements Serializable, Comparable {
      */
     private static final DateFormat responseDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
+    //The date returned by the WebService is in the standard GTM timezone
+    static {
+        responseDateFormat.setTimeZone(TimeZone.getTimeZone("Etc/GTM-0"));
+    }
+
     private Date date;
     private String homeTeamName;
     private String awayTeamName;
@@ -31,7 +37,6 @@ public class Match implements Serializable, Comparable {
     private String leagueCaption;
     private String selfLink;
     private String soccerSeasonLink;
-
 
 
     public Match(JSONObject json) throws JSONException, ParseException {

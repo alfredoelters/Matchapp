@@ -204,7 +204,7 @@ public class SplashScreenFragment extends Fragment {
         protected String doInBackground(Void... params) {
             //Fixed date for debug purposes
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_MONTH,17);
+            calendar.set(Calendar.DAY_OF_MONTH,23);
             calendar.set(Calendar.MONTH,4);
             calendar.set(Calendar.YEAR, 2015);
 
