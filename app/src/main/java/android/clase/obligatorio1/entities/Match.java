@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * created by Alfredo El Ters and Mathias Cabano on 12/05/15.
@@ -30,6 +31,7 @@ public class Match implements Serializable, Comparable {
     private String leagueCaption;
     private String selfLink;
     private String soccerSeasonLink;
+
 
 
     public Match(JSONObject json) throws JSONException, ParseException {

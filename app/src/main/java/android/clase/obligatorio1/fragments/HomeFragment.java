@@ -132,7 +132,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         mHomeListView.addHeaderView(inflater.inflate(R.layout.padding, mHomeListView, false));
         // add toolbar padding
         mHomeListView.addHeaderView(inflater.inflate(R.layout.padding, mHomeListView, false));
-        mHomeListView.setAdapter(new MatchesAdapter(mMatches));
         mHomeListView.setScrollViewCallbacks(this);
 
         // ------ Setup leagues Spinner  -----
@@ -144,13 +143,15 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         mLeaguesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                MatchesAdapter adapter = (MatchesAdapter)
-                        ((HeaderViewListAdapter) mHomeListView.getAdapter()).getWrappedAdapter();
-                //Filter without a query to only take into account the spinner filter.
-                adapter.getFilter().filter(null);
-                //Redraw options menu to hide the viewLeagueTableAction
-                // in case "All leagues" is selected
-                getActivity().invalidateOptionsMenu();
+                if (mHomeListView.getAdapter() != null) {
+                    MatchesAdapter adapter = (MatchesAdapter)
+                            ((HeaderViewListAdapter) mHomeListView.getAdapter()).getWrappedAdapter();
+                    //Filter without a query to only take into account the spinner filter.
+                    adapter.getFilter().filter(null);
+                    //Redraw options menu to hide the viewLeagueTableAction
+                    // in case "All leagues" is selected
+                    getActivity().invalidateOptionsMenu();
+                }
             }
 
             @Override
@@ -244,17 +245,17 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
 //        }
 //    }
 
-    public void selectFavoriteLeague(){
+    public void selectFavoriteLeague() {
         String favoriteLeagueCaption = mPreferences.getString(PreferencesKeys.PREFS_FAVORITE_LEAGUE,
                 null);
-        if(favoriteLeagueCaption!=null){
-            for(int i = 0;i<mLeagues.size();i++){
-                if(favoriteLeagueCaption.equals(mLeagues.get(i).getCaption())){
+        if (favoriteLeagueCaption != null) {
+            for (int i = 0; i < mLeagues.size(); i++) {
+                if (favoriteLeagueCaption.equals(mLeagues.get(i).getCaption())) {
                     mLeaguesSpinner.setSelection(i);
                     break;
                 }
             }
-        }else{
+        } else {
             mLeaguesSpinner.setSelection(0);
         }
     }
@@ -429,6 +430,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             mAllMatches = matches;
             Collections.sort(mAllMatches);
             mMatches.addAll(mAllMatches);
+            mHomeListView.setAdapter(new MatchesAdapter(mMatches));
             //If there is a favorite league, set the selection as this one.
             selectFavoriteLeague();
         }
@@ -517,8 +519,14 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
      */
     private class MatchesAdapter extends ArrayAdapter<Match> implements Filterable {
 
+        // State of the row that needs to show separator
+        private static final int SECTIONED_STATE = 1;
+        // State of the row that need not show separator
+        private static final int REGULAR_STATE = 2;
         private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         private final DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+        // Cache row states based on positions
+        private int[] rowStates;
 
         //Auxiliary string to determine when to render the header.
         private String lastLeagueCaption;
@@ -526,6 +534,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         public MatchesAdapter(List<Match> matches) {
             super(getActivity(), 0, matches);
             lastLeagueCaption = "";
+            rowStates = new int[matches.size()];
         }
 
 
@@ -539,10 +548,30 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             TextView leagueTittle = (TextView) convertView.findViewById(R.id.leagueTittle);
             View separatorView = convertView.findViewById(R.id.separator);
             String currentLeagueCaption = match.getLeagueCaption();
-            if (!lastLeagueCaption.equals(currentLeagueCaption)) {
+            //Determine if it is necessary to show the league title or the separator
+            boolean showLeagueTittle;
+            switch (rowStates[position]) {
+                case SECTIONED_STATE:
+                    showLeagueTittle = true;
+                    break;
+                case REGULAR_STATE:
+                    showLeagueTittle = false;
+                    break;
+                default:
+                    if (position == 0) {
+                        showLeagueTittle = true;
+                    } else {
+                        showLeagueTittle = !lastLeagueCaption.equals(currentLeagueCaption);
+                    }
+                    // Cache it
+                    rowStates[position] = showLeagueTittle ? SECTIONED_STATE : REGULAR_STATE;
+                    //Update last leagueCaption
+                    lastLeagueCaption = currentLeagueCaption;
+                    break;
+            }
+            if (showLeagueTittle) {
                 separatorView.setVisibility(View.GONE);
                 leagueTittle.setVisibility(View.VISIBLE);
-                lastLeagueCaption = currentLeagueCaption;
             } else {
                 separatorView.setVisibility(View.VISIBLE);
                 leagueTittle.setVisibility(View.GONE);
@@ -616,6 +645,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                 protected void publishResults(CharSequence constraint, FilterResults results) {
                     mMatches.clear();
                     mMatches.addAll((List<Match>) results.values);
+                    rowStates = new int[mMatches.size()];
                     notifyDataSetChanged();
                 }
             };
