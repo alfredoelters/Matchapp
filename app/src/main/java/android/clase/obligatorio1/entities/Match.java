@@ -16,7 +16,7 @@ import java.util.Date;
  * Class that consists of a simplification of a fixture, present in the head2head section returned
  * by the Web Service.
  */
-public class Match implements Serializable {
+public class Match implements Serializable, Comparable {
     /**
      * Format in which the WS sends the dates for this request
      */
@@ -27,8 +27,10 @@ public class Match implements Serializable {
     private String awayTeamName;
     private Integer goalsHomeTeam;
     private Integer goalsAwayTeam;
-
+    private String leagueCaption;
     private String selfLink;
+    private String soccerSeasonLink;
+
 
     public Match(JSONObject json) throws JSONException, ParseException {
         if (json != null) {
@@ -40,6 +42,8 @@ public class Match implements Serializable {
             goalsAwayTeam = result.getInt(JsonKeys.JSON_GOALS_AWAY_TEAM);
             selfLink = json.getJSONObject(JsonKeys.JSON_LINKS)
                     .getJSONObject(JsonKeys.JSON_SELF_LINK).getString(JsonKeys.JSON_HREF);
+            soccerSeasonLink = json.getJSONObject(JsonKeys.JSON_LINKS)
+                    .getJSONObject(JsonKeys.JSON_SOCCER_SEASON_LINK).getString(JsonKeys.JSON_HREF);
         }
     }
 
@@ -89,5 +93,28 @@ public class Match implements Serializable {
 
     public void setSelfLink(String selfLink) {
         this.selfLink = selfLink;
+    }
+
+    public String getLeagueCaption() {
+        return leagueCaption;
+    }
+
+    public void setLeagueCaption(String leagueCaption) {
+        this.leagueCaption = leagueCaption;
+    }
+
+    public String getSoccerSeasonLink() {
+        return soccerSeasonLink;
+    }
+
+    public void setSoccerSeasonLink(String soccerSeasonLink) {
+        this.soccerSeasonLink = soccerSeasonLink;
+    }
+
+    @Override
+    public int compareTo(Object another) {
+        if (!(another instanceof Match))
+            return -1;
+        return ((Match)another).getLeagueCaption().compareTo(leagueCaption);
     }
 }

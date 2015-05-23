@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -43,12 +44,12 @@ public class SplashScreenFragment extends Fragment {
     /**
      * boolean to notify that the GET to fetch leagues was successful
      */
-//    private boolean mLoadedLeagues;
+    private boolean mLoadedLeagues;
 
     /**
      * boolean to notify that the GET to fetch today's fixtures was successful
      */
-//    private boolean mLoadedMatches;
+    private boolean mLoadedMatches;
 
     /**
      * Task used to fetch leagues data
@@ -58,7 +59,7 @@ public class SplashScreenFragment extends Fragment {
     /**
      * Task used to fetch today's matches data
      */
-//    private FetchMatchesTask mFetchMatchesTask;
+    private FetchMatchesTask mFetchMatchesTask;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,8 +87,8 @@ public class SplashScreenFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Retry data fetch
-//                        mFetchMatchesTask = new FetchMatchesTask();
-//                        mFetchMatchesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        mFetchMatchesTask = new FetchMatchesTask();
+                        mFetchMatchesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         mFetchLeaguesTask = new FetchLeaguesTask();
                         mFetchLeaguesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         //Reset connection timeout
@@ -105,8 +106,8 @@ public class SplashScreenFragment extends Fragment {
         //By using the executeOnExecutor method the asyncTasks run concurrently
         mFetchLeaguesTask = new FetchLeaguesTask();
         mFetchLeaguesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-//        mFetchMatchesTask = new FetchMatchesTask();
-//        mFetchMatchesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        mFetchMatchesTask = new FetchMatchesTask();
+        mFetchMatchesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         return inflater.inflate(R.layout.fragment_splash_screen, container, false);
     }
 
@@ -122,11 +123,11 @@ public class SplashScreenFragment extends Fragment {
      */
     private void stopTasks() {
 //        mConnectionTimeoutTimer.cancel();
-//        mLoadedMatches = false;
-//        mLoadedLeagues = false;
-//        if (mFetchMatchesTask != null && mFetchMatchesTask.getStatus() != AsyncTask.Status.FINISHED) {
-//            mFetchMatchesTask.cancel(true);
-//        }
+        mLoadedMatches = false;
+        mLoadedLeagues = false;
+        if (mFetchMatchesTask != null && mFetchMatchesTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mFetchMatchesTask.cancel(true);
+        }
         if (mFetchLeaguesTask != null && mFetchLeaguesTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchLeaguesTask.cancel(true);
         }
@@ -184,43 +185,43 @@ public class SplashScreenFragment extends Fragment {
         @Override
         protected void onPostExecute(String leaguesJson) {
             if (leaguesJson != null) {
-//                mLoadedLeagues = true;
+                mLoadedLeagues = true;
                 mPreferences.edit().putString(PreferencesKeys.PREFS_LEAGUES, leaguesJson).commit();
-//                if (mLoadedMatches)
-                startHomeActivity();
+                if (mLoadedMatches)
+                    startHomeActivity();
             } else {
                 alertLoadError();
             }
         }
     }
 
-//    /**
-//     * AsyncTask to fetch today's matches.
-//     */
-//    private class FetchMatchesTask extends AsyncTask<Void, Void, String> {
-//
-//        @Override
-//        protected String doInBackground(Void... params) {
-//            //Fixed date for debug purposes
-//            Calendar calendar = Calendar.getInstance();
-//            calendar.set(Calendar.DAY_OF_MONTH,17);
-//            calendar.set(Calendar.MONTH,4);
-//            calendar.set(Calendar.YEAR, 2015);
-//
-//            return WebServiceInterface.getInstance().getFixturesJSONForDate(calendar.getTime(), null);
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String fixturesJson) {
-//            if (fixturesJson != null) {
-//                mLoadedMatches = true;
-//                mPreferences.edit().putString(PreferencesKeys.PREFS_HOME_MATCHES, fixturesJson).commit();
-//                if (mLoadedLeagues)
-//                    startHomeActivity();
-//            } else {
-//                alertLoadError();
-//            }
-//        }
-//
-//    }
+    /**
+     * AsyncTask to fetch today's matches.
+     */
+    private class FetchMatchesTask extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected String doInBackground(Void... params) {
+            //Fixed date for debug purposes
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH,17);
+            calendar.set(Calendar.MONTH,4);
+            calendar.set(Calendar.YEAR, 2015);
+
+            return WebServiceInterface.getInstance().getFixturesJSONForDate(calendar.getTime(), null);
+        }
+
+        @Override
+        protected void onPostExecute(String fixturesJson) {
+            if (fixturesJson != null) {
+                mLoadedMatches = true;
+                mPreferences.edit().putString(PreferencesKeys.PREFS_HOME_MATCHES, fixturesJson).commit();
+                if (mLoadedLeagues)
+                    startHomeActivity();
+            } else {
+                alertLoadError();
+            }
+        }
+
+    }
 }

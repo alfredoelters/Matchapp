@@ -25,14 +25,12 @@ public class SoccerSeason implements Serializable {
     private String fixturesLink;
     private String leagueTableLink;
 
-    private List<Match> matches;
 
     public SoccerSeason() {
-        matches = new ArrayList<>();
+
     }
 
     public SoccerSeason(JSONObject json) throws JSONException {
-        matches = new ArrayList<>();
         caption = json.getString(JsonKeys.JSON_CAPTION);
         league = json.getString(JsonKeys.JSON_LEAGUE);
         year = json.getString(JsonKeys.JSON_YEAR);
@@ -121,11 +119,4 @@ public class SoccerSeason implements Serializable {
         this.leagueTableLink = leagueTableLink;
     }
 
-    public List<Match> getMatches() {
-        return matches;
-    }
-
-    public void setMatches(List<Match> matches) {
-        this.matches = matches;
-    }
 }

@@ -11,7 +11,7 @@
     <!--Home Screen -->
     <string name="all_leagues">All leagues</string>
     <string name="vs">VS</string>
-    <string name="searchLeague">Search League</string>
+    <string name="searchLeague">Search By Team</string>
     <string name="viewLeagueTable">View League Table</string>
 
     <!--Fixture Details Screen -->
@@ -20,4 +20,5 @@
     <string name="head2head">Head to Head</string>
     <string name="matchDay">Matchday</string>
     <string name="startTime">Start time</string>
+    <string name="search_hint">Search a team</string>
 </resources>

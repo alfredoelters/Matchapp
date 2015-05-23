@@ -10,8 +10,9 @@ public class JsonKeys {
     public static final String JSON_HREF = "href";
     public static final String JSON_LINKS = "_links";
     public static final String JSON_SELF_LINK = "self";
-    public static final String JSON_SOCCER_SEASON_LINK = "homeTeam";
-    public static final String JSON_HOME_TEAM_LINKS = "awayTeam";
+    public static final String JSON_SOCCER_SEASON_LINK = "soccerseason";
+    public static final String JSON_HOME_TEAM_LINKS = "homeTeam";
+    public static final String JSON_AWAY_TEAM_LINKS = "awayTeam";
     public static final String JSON_TEAM_LINK = "team";
     public static final String JSON_TEAMS_LINK = "teams";
     public static final String JSON_FIXTURES_LINK = "fixtures";
