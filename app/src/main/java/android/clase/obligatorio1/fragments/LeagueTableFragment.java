@@ -4,6 +4,7 @@ import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.constants.PreferencesKeys;
 import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.LeagueTableStanding;
+import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
@@ -253,8 +255,7 @@ public class LeagueTableFragment extends Fragment {
                     } else {
                         // Filter total leagues by the constraint
                         for (LeagueTableStanding standing : mTotalStandings) {
-                            if (standing.getTeamName().toUpperCase().startsWith(constraint.toString()
-                                    .toUpperCase()))
+                            if (searchStandingByTeam(standing,constraint))
                                 value.add(standing);
 
                         }
@@ -262,6 +263,17 @@ public class LeagueTableFragment extends Fragment {
                     results.values = value;
                     results.count = value.size();
                     return results;
+                }
+
+                private boolean searchStandingByTeam(LeagueTableStanding standing, CharSequence constraint) {
+                    String[] upperCaseTeamName = standing.getTeamName().toUpperCase().split(" ");
+                    String upperCaseConstraint = constraint.toString().toUpperCase();
+                    for (String s : upperCaseTeamName) {
+                        if (s.startsWith(upperCaseConstraint)) {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
 
                 @Override
