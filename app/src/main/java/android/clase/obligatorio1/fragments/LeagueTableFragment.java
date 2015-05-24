@@ -168,6 +168,14 @@ public class LeagueTableFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mFetchLeagueTableTask != null && mFetchLeagueTableTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mFetchLeagueTableTask.cancel(true);
+        }
+    }
+
     private class FetchLeagueTableTask extends AsyncTask<Void, Void, LeagueTable> {
 
         @Override
