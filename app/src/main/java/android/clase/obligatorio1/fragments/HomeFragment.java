@@ -616,9 +616,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                     if (constraint == null || constraint.length() == 0) {
                         // Only take into account the spinnerFilter
                         for (Match m : mAllMatches) {
-                            if (selectedLeaguePosition == 0 || m.getLeagueCaption().
-                                    equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem())
-                                            .getCaption())) {
+                            if (selectedLeaguePosition == 0 || matchBelongToSelectedLeague(m)) {
                                 filteredList.add(m);
                             }
                         }
@@ -627,11 +625,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                     } else {
                         // Take into account both the league filter and the team filter
                         for (Match m : mAllMatches) {
-                            if (selectedLeaguePosition == 0 || m.getLeagueCaption().
-                                    equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem()).getCaption())) {
-                                if (m.getAwayTeamName().toUpperCase().startsWith(constraint.toString()
-                                        .toUpperCase()) || m.getHomeTeamName().toUpperCase()
-                                        .startsWith(constraint.toString().toUpperCase()))
+                            if (selectedLeaguePosition == 0 || matchBelongToSelectedLeague(m)) {
+                                if (searchMatchAnyTeam(m, constraint))
                                     filteredList.add(m);
                             }
                         }
@@ -647,6 +642,28 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                     mMatches.addAll((List<Match>) results.values);
                     rowStates = new int[mMatches.size()];
                     notifyDataSetChanged();
+                }
+
+                private boolean searchMatchAnyTeam(Match match, CharSequence constraint) {
+                    String[] upperCaseHomeTeamName = match.getHomeTeamName().toUpperCase().split(" ");
+                    String[] upperCaseAwayTeamName = match.getAwayTeamName().toUpperCase().split(" ");
+                    String upperCaseConstraint = constraint.toString().toUpperCase();
+                    for (String s : upperCaseHomeTeamName) {
+                        if (s.startsWith(upperCaseConstraint)) {
+                            return true;
+                        }
+                    }
+                    for (String s : upperCaseAwayTeamName) {
+                        if (s.startsWith(upperCaseConstraint)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                private boolean matchBelongToSelectedLeague(Match match) {
+                    return match.getLeagueCaption().
+                            equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem()).getCaption());
                 }
             };
         }
