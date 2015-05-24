@@ -267,6 +267,10 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         if (mLoadLeaguesTask != null && mLoadLeaguesTask.getStatus() != AsyncTask.Status.FINISHED) {
             mLoadLeaguesTask.cancel(true);
         }
+
+        if (mLoadMatchesTask != null && mLoadMatchesTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mLoadMatchesTask.cancel(true);
+        }
 //        for (FetchMatchesTask task : mFetchMatchesTasks) {
 //            if (task != null && task.getStatus() != AsyncTask.Status.FINISHED) {
 //                task.cancel(true);
