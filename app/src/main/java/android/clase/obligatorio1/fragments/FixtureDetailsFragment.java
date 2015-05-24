@@ -72,13 +72,13 @@ public class FixtureDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_fixutre_details, container, false);
         mMatchDayTextView = (TextView) v.findViewById(R.id.matchDayTextView);
-        mMatchDateTextView = (TextView) v.findViewById(R.id.matchDayTextView);
+        mMatchDateTextView = (TextView) v.findViewById(R.id.matchDateTextView);
         mMatchStatusTextView = (TextView) v.findViewById(R.id.matchStatusTextView);
         mMatchStartTimeTextView = (TextView) v.findViewById(R.id.matchStartTimeTextView);
         mHomeTeamTextView = (TextView) v.findViewById(R.id.homeTeamTextView);
         mHomeTeamScoreTextView = (TextView) v.findViewById(R.id.homeTeamScoreTextView);
         mAwayTeamTextView = (TextView) v.findViewById(R.id.awayTeamTextView);
-        mAwayTeamScoreTextView = (TextView) v.findViewById(R.id.awayTeamTextView);
+        mAwayTeamScoreTextView = (TextView) v.findViewById(R.id.awayTeamScoreTextView);
         mFetchFixtureTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar);
         mToolbar.setTitle(mLeagueName);
@@ -90,18 +90,17 @@ public class FixtureDetailsFragment extends Fragment {
     /**
      * Method to update the UI based on the fetches Fixture
      */
-    public void updateUI() {
-        mMatchDayTextView.setText(getString(R.string.matchDay) + " " + mFixture.getMatchDay());
+    private void updateUI() {
+        mMatchDayTextView.setText(getString(R.string.matchDay) + mFixture.getMatchDay());
         Date matchDate = mFixture.getDate();
         mMatchDateTextView.setText(MATCH_DATE_FORMAT.format(matchDate));
-        mMatchStartTimeTextView.setText(getString(R.string.startTime) + " " +
-                MATCH_TIME_FORMAT.format(matchDate));
+        mMatchStartTimeTextView.setText(getString(R.string.startTime) + MATCH_TIME_FORMAT.format(matchDate));
         mHomeTeamTextView.setText(mFixture.getHomeTeam().getName());
         //Need to transform the value to a string
-        mHomeTeamScoreTextView.setText(mFixture.getGoalsHomeTeam()+"");
+        mHomeTeamScoreTextView.setText(mFixture.getGoalsHomeTeam().toString());
         mAwayTeamTextView.setText(mFixture.getAwayTeam().getName());
         //Need to transform the value to a string
-        mAwayTeamScoreTextView.setText(mFixture.getGoalsAwayTeam()+"");
+        mAwayTeamScoreTextView.setText(mFixture.getGoalsAwayTeam().toString());
     }
 
     @Override
