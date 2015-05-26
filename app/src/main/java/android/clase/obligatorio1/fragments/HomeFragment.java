@@ -139,7 +139,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         // ------ Setup matches listView  -----
         mHomeListView = (ObservableListView) v.findViewById(R.id.homeListView);
         mHomeListView.setDivider(null);
-        mHomeListView.setDividerHeight(15);
+        mHomeListView.setDividerHeight(1);
         // add toolbar padding
         mHomeListView.addHeaderView(inflater.inflate(R.layout.padding, mHomeListView, false));
         // add toolbar padding
@@ -214,8 +214,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         //Hide the viewLeagueAction in case "All leagues" is selected
-        if (mLeaguesSpinner.getSelectedItemPosition() == 0)
-            menu.getItem(1).setVisible(false);
+        if (mLeaguesSpinner.getSelectedItemPosition() != 0)
+            menu.getItem(1).setVisible(true);
     }
 
     @Override
@@ -539,11 +539,12 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
 
         // State of the row that needs to show separator
         private static final int SECTIONED_STATE = 1;
-        // State of the row that need not show separator
+        // State of the row that doesn't need to separator
         private static final int REGULAR_STATE = 2;
         private final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         private final DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
-        // Cache row states based on positions
+
+        // Cache row states based on positions (Section or regular)
         private int[] rowStates;
 
         //Auxiliary string to determine when to render the header.
