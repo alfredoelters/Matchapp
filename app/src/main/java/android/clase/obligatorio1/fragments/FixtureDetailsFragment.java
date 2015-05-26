@@ -52,19 +52,18 @@ public class FixtureDetailsFragment extends Fragment {
     private String mLeagueName;
 
     /**
-     * Fixture fetched  by the async task
+     * Fixture received from intent.
      */
     private Fixture mFixture;
 
-    private FetchFixtureTask mFetchFixtureTask;
+//    private FetchFixtureTask mFetchFixtureTask;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent homeScreenIntent = getActivity().getIntent();
-        mMatchUrl = homeScreenIntent.getExtras().getString(HomeFragment.EXTRA_MATCH_URL);
+        mFixture = (Fixture) homeScreenIntent.getExtras().getSerializable(HomeFragment.EXTRA_MATCH);
         mLeagueName = homeScreenIntent.getExtras().getString(HomeFragment.EXTRA_LEAGUE_NAME);
-        mFetchFixtureTask = new FetchFixtureTask();
     }
 
     @Nullable
@@ -79,9 +78,9 @@ public class FixtureDetailsFragment extends Fragment {
         mHomeTeamScoreTextView = (TextView) v.findViewById(R.id.homeTeamScoreTextView);
         mAwayTeamTextView = (TextView) v.findViewById(R.id.awayTeamTextView);
         mAwayTeamScoreTextView = (TextView) v.findViewById(R.id.awayTeamScoreTextView);
-        mFetchFixtureTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar);
         mToolbar.setTitle(mLeagueName);
+        updateUI();
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         return v;
@@ -107,35 +106,35 @@ public class FixtureDetailsFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         //Finish all running async tasks
-        if (mFetchFixtureTask != null && mFetchFixtureTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mFetchFixtureTask.cancel(true);
-        }
+//        if (mFetchFixtureTask != null && mFetchFixtureTask.getStatus() != AsyncTask.Status.FINISHED) {
+//            mFetchFixtureTask.cancel(true);
+//        }
     }
 
-    private class FetchFixtureTask extends AsyncTask<Void, Void, Fixture> {
-
-        @Override
-        protected Fixture doInBackground(Void... params) {
-            JSONObject matchJSON = WebServiceUtils.getJSONObjectFromUrl(mMatchUrl);
-            Fixture result = null;
-            try {
-                result = new Fixture(matchJSON);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(Fixture fixture) {
-            if (fixture != null) {
-                mFixture = fixture;
-                updateUI();
-            } else {
-                //TODO handle error
-            }
-        }
-    }
+//    private class FetchFixtureTask extends AsyncTask<Void, Void, Fixture> {
+//
+//        @Override
+//        protected Fixture doInBackground(Void... params) {
+//            JSONObject matchJSON = WebServiceUtils.getJSONObjectFromUrl(mMatchUrl);
+//            Fixture result = null;
+//            try {
+//                result = new Fixture(matchJSON);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            } catch (ParseException e) {
+//                e.printStackTrace();
+//            }
+//            return result;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Fixture fixture) {
+//            if (fixture != null) {
+//                mFixture = fixture;
+//                updateUI();
+//            } else {
+//                //TODO handle error
+//            }
+//        }
+//    }
 }

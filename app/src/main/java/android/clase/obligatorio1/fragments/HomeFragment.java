@@ -1,12 +1,15 @@
 package android.clase.obligatorio1.fragments;
 
+import android.app.ProgressDialog;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.activities.FixtureDetailsActivity;
 import android.clase.obligatorio1.activities.LeagueTableActivity;
 import android.clase.obligatorio1.constants.JsonKeys;
 import android.clase.obligatorio1.constants.PreferencesKeys;
+import android.clase.obligatorio1.entities.Fixture;
 import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.SoccerSeason;
+import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -29,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.HeaderViewListAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -57,6 +61,7 @@ import java.util.List;
 public class HomeFragment extends Fragment implements ObservableScrollViewCallbacks {
     //Extra keys
     public static final String EXTRA_MATCH_URL = "matchUrl";
+    public static final String EXTRA_MATCH = "match";
     public static final String EXTRA_LEAGUE_TABLE_URL = "leagueTableUrl";
     public static final String EXTRA_LEAGUE_NAME = "leagueName";
 
@@ -105,6 +110,13 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private LoadLeaguesTask mLoadLeaguesTask;
 
     private LoadMatchesTask mLoadMatchesTask;
+
+    /**
+     * Variable to store the selected fixture.
+     */
+    private Fixture mFixture;
+
+    private FetchFixtureTask mFetchFixtureTask;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -266,6 +278,9 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         //Finish all running async tasks
         if (mLoadLeaguesTask != null && mLoadLeaguesTask.getStatus() != AsyncTask.Status.FINISHED) {
             mLoadLeaguesTask.cancel(true);
+        }
+        if (mFetchFixtureTask != null && mFetchFixtureTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mFetchFixtureTask.cancel(true);
         }
 //        for (FetchMatchesTask task : mFetchMatchesTasks) {
 //            if (task != null && task.getStatus() != AsyncTask.Status.FINISHED) {
@@ -594,11 +609,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent callTeamDetailActivity = new Intent(getActivity(),
-                            FixtureDetailsActivity.class);
-                    callTeamDetailActivity.putExtra(EXTRA_MATCH_URL, match.getSelfLink());
-                    callTeamDetailActivity.putExtra(EXTRA_LEAGUE_NAME, match.getLeagueCaption());
-                    startActivity(callTeamDetailActivity);
+                    mFetchFixtureTask = new FetchFixtureTask(match);
+                    mFetchFixtureTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             });
             return convertView;
@@ -666,6 +678,51 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                             equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem()).getCaption());
                 }
             };
+        }
+    }
+
+    private class FetchFixtureTask extends AsyncTask<Void, Void, Fixture> {
+
+        private Match mMatch;
+        private ProgressDialog mProgressDialog;
+
+        private FetchFixtureTask(Match match) {
+            mMatch = match;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = ProgressDialog.show(getActivity(), "Please wait...", "Getting match info...");
+        }
+
+        @Override
+        protected Fixture doInBackground(Void... params) {
+            JSONObject matchJSON = WebServiceUtils.getJSONObjectFromUrl(mMatch.getSelfLink());
+            Fixture result = null;
+            try {
+                result = new Fixture(matchJSON);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Fixture fixture) {
+            if (fixture != null) {
+                mFixture = fixture;
+                mProgressDialog.dismiss();
+                //When finished fetching fixture info, start fixture detail activity.
+                Intent callTeamDetailActivity = new Intent(getActivity(),
+                        FixtureDetailsActivity.class);
+                callTeamDetailActivity.putExtra(EXTRA_MATCH, fixture);
+                callTeamDetailActivity.putExtra(EXTRA_LEAGUE_NAME, mMatch.getLeagueCaption());
+                startActivity(callTeamDetailActivity);
+            } else {
+                //TODO handle error
+            }
         }
     }
 
