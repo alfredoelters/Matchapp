@@ -122,6 +122,6 @@ public class Match implements Serializable, Comparable {
     public int compareTo(Object another) {
         if (!(another instanceof Match))
             return -1;
-        return ((Match)another).getLeagueCaption().compareTo(leagueCaption);
+        return -((Match)another).getLeagueCaption().compareTo(leagueCaption);
     }
 }

@@ -4,9 +4,11 @@ import android.app.ProgressDialog;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.activities.FixtureDetailsActivity;
 import android.clase.obligatorio1.activities.LeagueTableActivity;
+import android.clase.obligatorio1.activities.TeamDetailsActivity;
 import android.clase.obligatorio1.constants.JsonKeys;
 import android.clase.obligatorio1.constants.PreferencesKeys;
 import android.clase.obligatorio1.entities.Fixture;
+import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.SoccerSeason;
 import android.clase.obligatorio1.utils.WebServiceUtils;
@@ -32,7 +34,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.HeaderViewListAdapter;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -46,6 +47,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.SoftReference;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,16 +62,17 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment implements ObservableScrollViewCallbacks {
     //Extra keys
-    public static final String EXTRA_MATCH_URL = "matchUrl";
     public static final String EXTRA_MATCH = "match";
-    public static final String EXTRA_LEAGUE_TABLE_URL = "leagueTableUrl";
     public static final String EXTRA_LEAGUE_NAME = "leagueName";
+
+    public static final String EXTRA_LEAGUE_TABLE = "leagueTable";
 
     //UI components
     private Spinner mLeaguesSpinner;
     private ObservableListView mHomeListView;
     private View mHeaderView;
     private Toolbar mToolbar;
+    private ProgressDialog mProgressDialog;
 
     /**
      * int to specify the translation of the toolbar based on the scrolling
@@ -111,12 +114,13 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
 
     private LoadMatchesTask mLoadMatchesTask;
 
-    /**
-     * Variable to store the selected fixture.
-     */
-    private Fixture mFixture;
+
 
     private FetchFixtureTask mFetchFixtureTask;
+
+
+
+    private FetchLeagueTableTask mFetchLeagueTableTask;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -222,13 +226,10 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.viewLeagueTableAction:
-                //Call leagueTableActivity with the selected league url and name
-                Intent intent = new Intent(getActivity(), LeagueTableActivity.class);
-                SoccerSeason selectedLeague = ((SoccerSeason) mLeaguesSpinner
-                        .getSelectedItem());
-                intent.putExtra(EXTRA_LEAGUE_TABLE_URL, selectedLeague.getLeagueTableLink());
-                intent.putExtra(EXTRA_LEAGUE_NAME, selectedLeague.getCaption());
-                startActivity(intent);
+                //Start async task to fetch the league
+                mFetchLeagueTableTask = new FetchLeagueTableTask();
+                mFetchLeagueTableTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                        ((SoccerSeason) mLeaguesSpinner.getSelectedItem()).getLeagueTableLink());
                 return true;
             case R.id.searchTeamAction:
                 getActivity().onSearchRequested();
@@ -279,11 +280,14 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         if (mLoadLeaguesTask != null && mLoadLeaguesTask.getStatus() != AsyncTask.Status.FINISHED) {
             mLoadLeaguesTask.cancel(true);
         }
-        if (mFetchFixtureTask != null && mFetchFixtureTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mFetchFixtureTask.cancel(true);
-
         if (mLoadMatchesTask != null && mLoadMatchesTask.getStatus() != AsyncTask.Status.FINISHED) {
             mLoadMatchesTask.cancel(true);
+        }
+        if (mFetchFixtureTask != null && mFetchFixtureTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mFetchFixtureTask.cancel(true);
+        }
+        if (mFetchLeagueTableTask != null && mFetchLeagueTableTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mFetchLeagueTableTask.cancel(true);
         }
 //        for (FetchMatchesTask task : mFetchMatchesTasks) {
 //            if (task != null && task.getStatus() != AsyncTask.Status.FINISHED) {
@@ -291,6 +295,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
 //            }
 //        }
     }
+
 
     @Override
     public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {
@@ -402,6 +407,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         protected void onPostExecute(List<SoccerSeason> soccerSeasons) {
             super.onPostExecute(soccerSeasons);
             mLeagues.addAll(soccerSeasons);
+            Collections.sort(mLeagues);
             ((ArrayAdapter<SoccerSeason>) mLeaguesSpinner.getAdapter()).notifyDataSetChanged();
             for (SoccerSeason league : mLeagues) {
                 mLeagueCaptions.put(league.getSelfLink(), league.getCaption());
@@ -688,7 +694,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private class FetchFixtureTask extends AsyncTask<Void, Void, Fixture> {
 
         private Match mMatch;
-        private ProgressDialog mProgressDialog;
 
         private FetchFixtureTask(Match match) {
             mMatch = match;
@@ -696,7 +701,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
 
         @Override
         protected void onPreExecute() {
-            mProgressDialog = ProgressDialog.show(getActivity(), "Please wait...", "Getting match info...");
+            mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.pleaseWait),
+                    getString(R.string.gettingMatch));
         }
 
         @Override
@@ -716,15 +722,50 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         @Override
         protected void onPostExecute(Fixture fixture) {
             if (fixture != null) {
-                mFixture = fixture;
                 mProgressDialog.dismiss();
                 //When finished fetching fixture info, start fixture detail activity.
-                Intent callTeamDetailActivity = new Intent(getActivity(),
+                Intent callFixtureDetailsActivity= new Intent(getActivity(),
                         FixtureDetailsActivity.class);
-                callTeamDetailActivity.putExtra(EXTRA_MATCH, fixture);
-                callTeamDetailActivity.putExtra(EXTRA_LEAGUE_NAME, mMatch.getLeagueCaption());
-                startActivity(callTeamDetailActivity);
+                callFixtureDetailsActivity.putExtra(EXTRA_MATCH, fixture);
+                callFixtureDetailsActivity.putExtra(EXTRA_LEAGUE_NAME, mMatch.getLeagueCaption());
+                startActivity(callFixtureDetailsActivity);
             } else {
+                //TODO handle error
+            }
+        }
+    }
+
+    private class FetchLeagueTableTask extends AsyncTask<String, Void, LeagueTable> {
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.pleaseWait),
+                    getString(R.string.gettingLeagueTable));
+        }
+
+        @Override
+        protected LeagueTable doInBackground(String... params) {
+            String leagueTableUrl = params[0];
+            JSONObject leagueTable = WebServiceUtils.getJSONObjectFromUrl(leagueTableUrl);
+            LeagueTable result = null;
+            try {
+                result = new LeagueTable(leagueTable);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(LeagueTable leagueTable) {
+            if(leagueTable!=null) {
+                mProgressDialog.dismiss();
+                //When finished fetching leagueTable, start league table activity.
+                Intent callLeagueTableActivity = new Intent(getActivity(),
+                        LeagueTableActivity.class);
+                callLeagueTableActivity.putExtra(EXTRA_LEAGUE_TABLE, leagueTable);
+                startActivity(callLeagueTableActivity);
+            }else{
                 //TODO handle error
             }
         }
