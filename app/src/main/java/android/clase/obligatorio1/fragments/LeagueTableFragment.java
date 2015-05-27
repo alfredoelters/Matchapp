@@ -4,6 +4,7 @@ import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.constants.PreferencesKeys;
 import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.LeagueTableStanding;
+import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
@@ -43,15 +45,6 @@ public class LeagueTableFragment extends Fragment {
     private Toolbar mToolbar;
     private ObservableListView mStandingsListView;
 
-    /**
-     * League table url obtained from the homeActivity
-     */
-    private String mLeagueTableUrl;
-
-    /**
-     * League name obtained from the homeActivity
-     */
-    private String mLeagueName;
 
     /**
      * LeagueTable fetched by the async task
@@ -70,12 +63,6 @@ public class LeagueTableFragment extends Fragment {
 
 
     /**
-     * AsyncTask to fetch the LeagueTable based on its url
-     */
-    private FetchLeagueTableTask mFetchLeagueTableTask;
-
-
-    /**
      * Auxiliary boolean to determine if the league is favorite or not
      */
     private boolean mIsFavorite;
@@ -84,13 +71,16 @@ public class LeagueTableFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent homeIntent = getActivity().getIntent();
-        mLeagueTableUrl = homeIntent.getExtras().getString(HomeFragment.EXTRA_LEAGUE_TABLE_URL);
-        mLeagueName = homeIntent.getExtras().getString(HomeFragment.EXTRA_LEAGUE_NAME);
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mFetchLeagueTableTask = new FetchLeagueTableTask();
-        mIsFavorite = mPreferences.getString(PreferencesKeys.PREFS_FAVORITE_LEAGUE, "").equals(mLeagueName);
-        mTotalStandings = new ArrayList<>();
+        mLeagueTable = (LeagueTable) getActivity().getIntent()
+                .getSerializableExtra(HomeFragment.EXTRA_LEAGUE_TABLE);
+        if(mLeagueTable!= null) {
+            mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            mIsFavorite = mPreferences.getString(PreferencesKeys.PREFS_FAVORITE_LEAGUE, "")
+                    .equals(mLeagueTable.getLeagueCaption());
+            mTotalStandings = new ArrayList<>();
+        }else{
+            getActivity().finish();
+        }
     }
 
     @Override
@@ -100,11 +90,11 @@ public class LeagueTableFragment extends Fragment {
         mStandingsListView = (ObservableListView) v.findViewById(R.id.standingsListView);
         mStandingsListView.setDivider(null);
         // ------ Start async task to fetch league table  -----
-        mFetchLeagueTableTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
+        mStandingsListView.setAdapter(new LeagueStandingsAdapter(mLeagueTable.getStandings()));
+        mTotalStandings.addAll(mLeagueTable.getStandings());
         // ------ Setup toolbar  -----
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        mToolbar.setTitle(mLeagueName);
+        mToolbar.setTitle(mLeagueTable.getLeagueCaption());
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
@@ -168,27 +158,7 @@ public class LeagueTableFragment extends Fragment {
         }
     }
 
-    private class FetchLeagueTableTask extends AsyncTask<Void, Void, LeagueTable> {
 
-        @Override
-        protected LeagueTable doInBackground(Void... params) {
-            JSONObject leagueTable = WebServiceUtils.getJSONObjectFromUrl(mLeagueTableUrl);
-            LeagueTable result = null;
-            try {
-                result = new LeagueTable(leagueTable);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(LeagueTable leagueTable) {
-            mLeagueTable = leagueTable;
-            mStandingsListView.setAdapter(new LeagueStandingsAdapter(mLeagueTable.getStandings()));
-            mTotalStandings.addAll(mLeagueTable.getStandings());
-        }
-    }
 
     private class LeagueStandingsAdapter extends ArrayAdapter<LeagueTableStanding> implements Filterable {
 
@@ -245,8 +215,7 @@ public class LeagueTableFragment extends Fragment {
                     } else {
                         // Filter total leagues by the constraint
                         for (LeagueTableStanding standing : mTotalStandings) {
-                            if (standing.getTeamName().toUpperCase().startsWith(constraint.toString()
-                                    .toUpperCase()))
+                            if (searchStandingByTeam(standing,constraint))
                                 value.add(standing);
 
                         }
@@ -254,6 +223,17 @@ public class LeagueTableFragment extends Fragment {
                     results.values = value;
                     results.count = value.size();
                     return results;
+                }
+
+                private boolean searchStandingByTeam(LeagueTableStanding standing, CharSequence constraint) {
+                    String[] upperCaseTeamName = standing.getTeamName().toUpperCase().split(" ");
+                    String upperCaseConstraint = constraint.toString().toUpperCase();
+                    for (String s : upperCaseTeamName) {
+                        if (s.startsWith(upperCaseConstraint)) {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
 
                 @Override

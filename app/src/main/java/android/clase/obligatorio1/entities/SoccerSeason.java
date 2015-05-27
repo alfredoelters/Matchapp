@@ -13,7 +13,7 @@ import java.util.List;
  * created by Alfredo El Ters and Mathias Cabano on 09/05/15.
  * Class to represent a league returned by the Web Service.
  */
-public class SoccerSeason implements Serializable {
+public class SoccerSeason implements Serializable, Comparable {
     private String caption;
     private String league;
     private String year;
@@ -119,4 +119,10 @@ public class SoccerSeason implements Serializable {
         this.leagueTableLink = leagueTableLink;
     }
 
+    @Override
+    public int compareTo(Object another) {
+        if (!(another instanceof SoccerSeason))
+            return -1;
+        return -((SoccerSeason)another).getCaption().compareTo(caption);
+    }
 }

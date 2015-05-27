@@ -9,6 +9,7 @@
         app:showAsAction="collapseActionView|ifRoom" />
     <item
         android:id="@+id/viewLeagueTableAction"
+        android:visible="false"
         android:icon="@android:drawable/ic_menu_sort_by_size"
         android:title="@string/viewLeagueTable"
         app:showAsAction="ifRoom" />

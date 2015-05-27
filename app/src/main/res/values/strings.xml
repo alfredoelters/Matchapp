@@ -13,6 +13,9 @@
     <string name="vs">VS</string>
     <string name="searchTeam">Search Team</string>
     <string name="viewLeagueTable">View League Table</string>
+    <string name="pleaseWait">Please wait...</string>
+    <string name="gettingMatch">Getting match info...</string>
+    <string name="gettingLeagueTable">Getting league table info...</string>
 
     <!--Fixture Details Screen -->
     <string name="home">Home</string>
