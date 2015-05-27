@@ -40,12 +40,13 @@ public class FixtureDetailsFragment extends Fragment {
     private TextView mHomeTeamScoreTextView;
     private TextView mAwayTeamTextView;
     private TextView mAwayTeamScoreTextView;
+    private TextView mHomeTeamNameH2H;
+    private TextView mAwayTeamNameH2H;
+    private TextView mHomeTeamWins;
+    private TextView mAwayTeamWins;
+    private TextView mDraws;
     private Toolbar mToolbar;
 
-    /**
-     * Match Url obtained from the HomeActivity
-     */
-    private String mMatchUrl;
     /**
      * League name obtained from the HomeActivity
      */
@@ -78,6 +79,11 @@ public class FixtureDetailsFragment extends Fragment {
         mHomeTeamScoreTextView = (TextView) v.findViewById(R.id.homeTeamScoreTextView);
         mAwayTeamTextView = (TextView) v.findViewById(R.id.awayTeamTextView);
         mAwayTeamScoreTextView = (TextView) v.findViewById(R.id.awayTeamScoreTextView);
+        mHomeTeamNameH2H = (TextView) v.findViewById(R.id.home_team_name_h2h);
+        mAwayTeamNameH2H = (TextView) v.findViewById(R.id.away_team_name_h2h);
+        mHomeTeamWins = (TextView) v.findViewById(R.id.home_team_wins);
+        mAwayTeamWins = (TextView) v.findViewById(R.id.away_team_wins);
+        mDraws = (TextView) v.findViewById(R.id.draws);
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar);
         mToolbar.setTitle(mLeagueName);
         updateUI();
@@ -96,45 +102,21 @@ public class FixtureDetailsFragment extends Fragment {
         mMatchStartTimeTextView.setText(getString(R.string.startTime) + MATCH_TIME_FORMAT.format(matchDate));
         mHomeTeamTextView.setText(mFixture.getHomeTeam().getName());
         //Need to transform the value to a string
-        mHomeTeamScoreTextView.setText(mFixture.getGoalsHomeTeam().toString());
+        Integer homeTeamScore = mFixture.getGoalsHomeTeam();
+        mHomeTeamScoreTextView.setText(homeTeamScore != -1 ? homeTeamScore.toString() : " - ");
         mAwayTeamTextView.setText(mFixture.getAwayTeam().getName());
         //Need to transform the value to a string
-        mAwayTeamScoreTextView.setText(mFixture.getGoalsAwayTeam().toString());
+        Integer awayTeamScore = mFixture.getGoalsAwayTeam();
+        mAwayTeamScoreTextView.setText(awayTeamScore != -1 ? awayTeamScore.toString() : " - ");
+        mHomeTeamNameH2H.setText(mFixture.getHomeTeam().getName());
+        mAwayTeamNameH2H.setText(mFixture.getAwayTeam().getName());
+        mHomeTeamWins.setText(mFixture.getHead2Head().getHomeTeamWins().toString());
+        mAwayTeamWins.setText(mFixture.getHead2Head().getAwayTeamWins().toString());
+        mDraws.setText(mFixture.getHead2Head().getDraws().toString());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //Finish all running async tasks
-//        if (mFetchFixtureTask != null && mFetchFixtureTask.getStatus() != AsyncTask.Status.FINISHED) {
-//            mFetchFixtureTask.cancel(true);
-//        }
     }
-
-//    private class FetchFixtureTask extends AsyncTask<Void, Void, Fixture> {
-//
-//        @Override
-//        protected Fixture doInBackground(Void... params) {
-//            JSONObject matchJSON = WebServiceUtils.getJSONObjectFromUrl(mMatchUrl);
-//            Fixture result = null;
-//            try {
-//                result = new Fixture(matchJSON);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            } catch (ParseException e) {
-//                e.printStackTrace();
-//            }
-//            return result;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Fixture fixture) {
-//            if (fixture != null) {
-//                mFixture = fixture;
-//                updateUI();
-//            } else {
-//                //TODO handle error
-//            }
-//        }
-//    }
 }

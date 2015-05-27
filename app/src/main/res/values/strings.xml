@@ -17,7 +17,7 @@
     <!--Fixture Details Screen -->
     <string name="home">Home</string>
     <string name="away">Away</string>
-    <string name="head2head">Last 10</string>
+    <string name="head2head">Head2Head</string>
     <string name="matchDay">Matchday&#160;</string>
     <string name="startTime">Start time:&#160;</string>
     <string name="search_hint">Search a team</string>
