@@ -1,5 +1,8 @@
 package android.clase.obligatorio1.utils;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
@@ -12,9 +15,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -118,5 +124,53 @@ public class WebServiceUtils {
             if (connection != null) connection.disconnect();
         }
         return null;
+    }
+
+
+    public static Bitmap downloadBitmapFromUrl(String url, Context context, String auxiliaryFileName){
+        URL fileUrl;
+        HttpURLConnection connection = null;
+        Bitmap bitmap = null;
+        try {
+            fileUrl = new URL(url);
+            connection = (HttpURLConnection) fileUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK) { // HTTP OK 200 result code
+
+                // get total size in bytes that we will read from the response
+                int totalSize = connection.getContentLength();
+
+                // get input stream to read bytes from
+                InputStream stream = connection.getInputStream();
+                // we will save the image on storage, as a jpg file
+                String filePath = context.getExternalFilesDir(null) + File.separator
+                        + auxiliaryFileName +".jpg";
+                OutputStream outputStream = new FileOutputStream(filePath);
+
+                byte[] bytes = new byte[1024];
+                int currentSize;
+                while ((currentSize = stream.read(bytes)) != -1) {
+                    // read bytes until we have bytes to read from the stream
+                    outputStream.write(bytes, 0, currentSize); // write bytes read to file
+                }
+
+                bitmap = BitmapFactory.decodeFile(filePath); // decode image from downloaded file
+
+                // close and flush streams
+                stream.close();
+                outputStream.flush();
+                outputStream.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // always close connection
+            if(connection != null) connection.disconnect();
+        }
+
+        return bitmap;
     }
 }

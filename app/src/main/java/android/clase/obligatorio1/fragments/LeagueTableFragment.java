@@ -210,16 +210,10 @@ public class LeagueTableFragment extends Fragment {
     }
 
     private class LeagueStandingsAdapter extends ArrayAdapter<LeagueTableStanding> implements Filterable {
-        private List<LeagueTableStanding> mFilteredLeagueStandings;
         public LeagueStandingsAdapter(List<LeagueTableStanding> standings) {
             super(getActivity(), 0, standings);
-            mFilteredLeagueStandings = standings;
         }
 
-        @Override
-        public int getCount() {
-            return mFilteredLeagueStandings.size();
-        }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -280,20 +274,20 @@ public class LeagueTableFragment extends Fragment {
                 @Override
                 protected FilterResults performFiltering(CharSequence constraint) {
                     FilterResults results = new FilterResults();
-                    mFilteredLeagueStandings.clear();
+                    List<LeagueTableStanding> values = new ArrayList<>();
                     // We implement here the filter logic
                     if (constraint == null || constraint.length() == 0) {
-                        mFilteredLeagueStandings.addAll(mTotalStandings);
+                        values.addAll(mTotalStandings);
                     } else {
                         // Filter total leagues by the constraint
                         for (LeagueTableStanding standing : mTotalStandings) {
                             if (searchStandingByTeam(standing, constraint))
-                                mFilteredLeagueStandings.add(standing);
+                                values.add(standing);
 
                         }
                     }
-                    results.values = mFilteredLeagueStandings;
-                    results.count = mFilteredLeagueStandings.size();
+                    results.values = values;
+                    results.count = values.size();
                     return results;
                 }
 

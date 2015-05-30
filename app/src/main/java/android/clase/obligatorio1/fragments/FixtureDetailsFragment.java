@@ -2,9 +2,13 @@ package android.clase.obligatorio1.fragments;
 
 
 import android.clase.obligatorio1.R;
+import android.clase.obligatorio1.constants.JsonKeys;
 import android.clase.obligatorio1.entities.Fixture;
+import android.clase.obligatorio1.entities.Match;
+import android.clase.obligatorio1.entities.Team;
 import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -43,10 +47,6 @@ public class FixtureDetailsFragment extends Fragment {
     private Toolbar mToolbar;
 
     /**
-     * Match Url obtained from the HomeActivity
-     */
-    private String mMatchUrl;
-    /**
      * League name obtained from the HomeActivity
      */
     private String mLeagueName;
@@ -56,14 +56,22 @@ public class FixtureDetailsFragment extends Fragment {
      */
     private Fixture mFixture;
 
+    private Team mHomeTeam;
+    private Team mAwayTeam;
+
 //    private FetchFixtureTask mFetchFixtureTask;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent homeScreenIntent = getActivity().getIntent();
-        mFixture = (Fixture) homeScreenIntent.getExtras().getSerializable(HomeFragment.EXTRA_MATCH);
-        mLeagueName = homeScreenIntent.getExtras().getString(HomeFragment.EXTRA_LEAGUE_NAME);
+        Bundle extras = homeScreenIntent.getExtras();
+        mFixture = (Fixture) extras.getSerializable(HomeFragment.EXTRA_MATCH);
+        mHomeTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_HOME_TEAM);
+        mHomeTeam.setCrestImage(extras.<Bitmap>getParcelable(HomeFragment.EXTRA_HOME_TEAM_CREST));
+        mAwayTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_AWAY_TEAM);
+        mAwayTeam.setCrestImage(extras.<Bitmap>getParcelable(HomeFragment.EXTRA_AWAY_TEAM_CREST));
+        mLeagueName = extras.getString(HomeFragment.EXTRA_LEAGUE_NAME);
     }
 
     @Nullable

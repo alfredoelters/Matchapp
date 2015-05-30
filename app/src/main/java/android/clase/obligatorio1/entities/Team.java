@@ -1,6 +1,7 @@
 package android.clase.obligatorio1.entities;
 
 import android.clase.obligatorio1.constants.JsonKeys;
+import android.graphics.Bitmap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,9 +19,10 @@ public class Team implements Serializable {
     private String code;
     private String shortName;
     private String squadMarketValue;
-    private String crestURL;
+    private Bitmap crestImage;
 
     //Links to get related entities from the API.
+    private String crestURL;
     private String selfLink;
     private String fixturesLink;
     private String playersLink;
@@ -115,5 +117,13 @@ public class Team implements Serializable {
 
     public void setPlayers(List<Player> players) {
         this.players = players;
+    }
+
+    public Bitmap getCrestImage() {
+        return crestImage;
+    }
+
+    public void setCrestImage(Bitmap crestImage) {
+        this.crestImage = crestImage;
     }
 }
