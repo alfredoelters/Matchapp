@@ -6,6 +6,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * created by Alfredo El Ters and Mathias Cabano on 08/05/15.
@@ -23,8 +25,10 @@ public class Team implements Serializable {
     private String fixturesLink;
     private String playersLink;
 
-    public Team() {
+    private List<Player> players;
 
+    public Team() {
+        players = new ArrayList<>();
     }
 
     public Team(JSONObject json) throws JSONException {
@@ -33,11 +37,12 @@ public class Team implements Serializable {
         shortName = json.getString(JsonKeys.JSON_SHORT_NAME);
         squadMarketValue = json.getString(JsonKeys.JSON_CODE);
         crestURL = json.getString(JsonKeys.JSON_CREST_URL);
-        squadMarketValue = json.getString(JsonKeys.JSON_MARKET_VALUE);
+        squadMarketValue = json.getString(JsonKeys.JSON_SQUAD_MARKET_VALUE);
         JSONObject links = json.getJSONObject(JsonKeys.JSON_LINKS);
         selfLink = links.getJSONObject(JsonKeys.JSON_SELF_LINK).getString(JsonKeys.JSON_HREF);
         fixturesLink = links.getJSONObject(JsonKeys.JSON_FIXTURES_LINK).getString(JsonKeys.JSON_HREF);
         playersLink = links.getJSONObject(JsonKeys.JSON_PLAYERS_LINK).getString(JsonKeys.JSON_HREF);
+        players = new ArrayList<>();
     }
 
     public String getName() {
@@ -102,5 +107,13 @@ public class Team implements Serializable {
 
     public void setPlayersLink(String playersLink) {
         this.playersLink = playersLink;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
     }
 }

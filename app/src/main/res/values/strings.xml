@@ -50,6 +50,15 @@
     <string name="team">Team</string>
     <string name="position">Pos.</string>
     <string name="favorite">Favorite</string>
+    <string name="gettingTeamInfo">Getting team info...</string>
+
+    <!--Team Details Screen -->
+    <string name="marketValue">Market value:</string>
+    <string name="players">Players</string>
+    <string name="squadNumber">No.</string>
+    <string name="name">Name</string>
+    <string name="playerPosition">Position</string>
+    <string name="nationality">Nationality</string>
 
 
 

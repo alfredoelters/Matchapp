@@ -1,10 +1,15 @@
 package android.clase.obligatorio1.fragments;
 
+import android.app.ProgressDialog;
 import android.clase.obligatorio1.R;
+import android.clase.obligatorio1.activities.TeamDetailsActivity;
+import android.clase.obligatorio1.constants.JsonKeys;
 import android.clase.obligatorio1.constants.PreferencesKeys;
+import android.clase.obligatorio1.constants.WebServiceURLs;
 import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.LeagueTableStanding;
-import android.clase.obligatorio1.entities.Match;
+import android.clase.obligatorio1.entities.Player;
+import android.clase.obligatorio1.entities.Team;
 import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,14 +30,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,10 +46,16 @@ import java.util.List;
  * Created by alfredo on 20/05/15.
  */
 public class LeagueTableFragment extends Fragment {
+    /**
+     * Extra keys to send data to the TeamDetailsActivity
+     */
+    public static final String EXTRA_LEAGUE_STANDING = "leagueTableStanding";
+    public static final String EXTRA_TEAM = "team";
 
     //UI Components
     private Toolbar mToolbar;
     private ObservableListView mStandingsListView;
+    private ProgressDialog mProgressDialog;
 
 
     /**
@@ -67,18 +79,50 @@ public class LeagueTableFragment extends Fragment {
      */
     private boolean mIsFavorite;
 
+    /**
+     * AsyncTask to fetch team details of the team selected
+     */
+    private FetchTeamDetailsTask mFetchTeamDetailsTask;
+
+    /**
+     * AsyncTask to fetch team players of the team selected
+     */
+    private FetchTeamPlayersTask mFetchTeamPlayersTask;
+
+    /**
+     * Auxiliary list to store the team fetch by the FetchTeamDetailsTask
+     */
+    private Team mTeam;
+
+    /**
+     * Auxiliary list to store all players fetch by the FetchTeamPlayersTask
+     */
+    private List<Player> mTeamPlayers;
+
+    /**
+     * Boolean to notify the end of the FetchTeamDetailsTask
+     * (for concurrency purposes)
+     */
+    private boolean mFetchTeam;
+
+    /**
+     * Boolean to notify the end of the FetchTeamPlayersTask
+     * (for concurrency purposes)
+     */
+    private boolean mFetchPlayers;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mLeagueTable = (LeagueTable) getActivity().getIntent()
                 .getSerializableExtra(HomeFragment.EXTRA_LEAGUE_TABLE);
-        if(mLeagueTable!= null) {
+        if (mLeagueTable != null) {
             mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             mIsFavorite = mPreferences.getString(PreferencesKeys.PREFS_FAVORITE_LEAGUE, "")
                     .equals(mLeagueTable.getLeagueCaption());
             mTotalStandings = new ArrayList<>();
-        }else{
+        } else {
             getActivity().finish();
         }
     }
@@ -89,7 +133,6 @@ public class LeagueTableFragment extends Fragment {
         // ------ Setup standings listView  -----
         mStandingsListView = (ObservableListView) v.findViewById(R.id.standingsListView);
         mStandingsListView.setDivider(null);
-        // ------ Start async task to fetch league table  -----
         mStandingsListView.setAdapter(new LeagueStandingsAdapter(mLeagueTable.getStandings()));
         mTotalStandings.addAll(mLeagueTable.getStandings());
         // ------ Setup toolbar  -----
@@ -158,12 +201,24 @@ public class LeagueTableFragment extends Fragment {
         }
     }
 
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mFetchTeamDetailsTask != null && mFetchTeamDetailsTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mFetchTeamDetailsTask.cancel(true);
+        }
+    }
 
     private class LeagueStandingsAdapter extends ArrayAdapter<LeagueTableStanding> implements Filterable {
-
+        private List<LeagueTableStanding> mFilteredLeagueStandings;
         public LeagueStandingsAdapter(List<LeagueTableStanding> standings) {
             super(getActivity(), 0, standings);
+            mFilteredLeagueStandings = standings;
+        }
+
+        @Override
+        public int getCount() {
+            return mFilteredLeagueStandings.size();
         }
 
         @Override
@@ -172,9 +227,9 @@ public class LeagueTableFragment extends Fragment {
                 convertView = getActivity().getLayoutInflater()
                         .inflate(R.layout.league_table_standing_list_item, null);
             }
-            if(position == 0)
+            if (position == 0)
                 convertView.findViewById(R.id.separator).setVisibility(View.GONE);
-            LeagueTableStanding standing = getItem(position);
+            final LeagueTableStanding standing = getItem(position);
             ((TextView) convertView.findViewById(R.id.positionTextView))
                     .setText(standing.getPosition().toString());
             ((TextView) convertView.findViewById(R.id.teamTextView))
@@ -189,16 +244,33 @@ public class LeagueTableFragment extends Fragment {
                     .setText(standing.getGoalDifference().toString());
             ((TextView) convertView.findViewById(R.id.pointsTextView))
                     .setText(standing.getPoints().toString());
-            //Paint standings based on their position in the LeagueTable
+            //Paint standings based on their position in the LeagueTable and save the color in the
+            //standing in case it is needed later. (E.g.: in the team's details screen)
             if (standing.getPosition() <= 4) {
                 convertView.setBackgroundColor(getResources().getColor(R.color.light_green));
+                standing.setBackgroundColor(getResources().getColor(R.color.light_green));
             } else {
                 if (standing.getPosition() > mTotalStandings.size() - 3) {
                     convertView.setBackgroundColor(getResources().getColor(R.color.light_red));
+                    standing.setBackgroundColor(getResources().getColor(R.color.light_red));
                 } else {
                     convertView.setBackgroundColor(Color.TRANSPARENT);
                 }
             }
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Set booleans to false to indicate that we will start fetching both entities
+                    mFetchTeam = false;
+                    mFetchPlayers = false;
+                    //Start the fetchTeamsDetailsTask to fetch team's data
+                    mFetchTeamDetailsTask = new FetchTeamDetailsTask();
+                    mFetchTeamDetailsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, standing);
+                    //Start the fetchTeamsDetailsTask to fetch team's players
+                    mFetchTeamPlayersTask = new FetchTeamPlayersTask();
+                    mFetchTeamPlayersTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, standing);
+                }
+            });
             return convertView;
         }
 
@@ -208,20 +280,20 @@ public class LeagueTableFragment extends Fragment {
                 @Override
                 protected FilterResults performFiltering(CharSequence constraint) {
                     FilterResults results = new FilterResults();
-                    List<LeagueTableStanding> value = new ArrayList<>();
+                    mFilteredLeagueStandings.clear();
                     // We implement here the filter logic
                     if (constraint == null || constraint.length() == 0) {
-                        value.addAll(mTotalStandings);
+                        mFilteredLeagueStandings.addAll(mTotalStandings);
                     } else {
                         // Filter total leagues by the constraint
                         for (LeagueTableStanding standing : mTotalStandings) {
-                            if (searchStandingByTeam(standing,constraint))
-                                value.add(standing);
+                            if (searchStandingByTeam(standing, constraint))
+                                mFilteredLeagueStandings.add(standing);
 
                         }
                     }
-                    results.values = value;
-                    results.count = value.size();
+                    results.values = mFilteredLeagueStandings;
+                    results.count = mFilteredLeagueStandings.size();
                     return results;
                 }
 
@@ -243,6 +315,86 @@ public class LeagueTableFragment extends Fragment {
                     notifyDataSetChanged();
                 }
             };
+        }
+    }
+
+    private class FetchTeamDetailsTask extends AsyncTask<LeagueTableStanding, Void, Void> {
+        private LeagueTableStanding mLeagueTableStanding;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.pleaseWait),
+                    getString(R.string.gettingTeamInfo));
+        }
+
+        @Override
+        protected Void doInBackground(LeagueTableStanding... params) {
+            mLeagueTableStanding = params[0];
+            JSONObject team = WebServiceUtils.getJSONObjectFromUrl(
+                    mLeagueTableStanding.getTeamLink());
+            try {
+                mTeam = new Team(team);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (mTeam != null) {
+                mFetchTeam = true;
+                if (mFetchPlayers) {
+                    mProgressDialog.dismiss();
+                    mTeam.getPlayers().addAll(mTeamPlayers);
+                    Intent callTeamDetailsActivity = new Intent(getActivity(),
+                            TeamDetailsActivity.class);
+                    callTeamDetailsActivity.putExtra(EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
+                    callTeamDetailsActivity.putExtra(EXTRA_TEAM, mTeam);
+                    startActivity(callTeamDetailsActivity);
+                }
+            } else {
+                //TODO handle error
+            }
+        }
+    }
+
+    private class FetchTeamPlayersTask extends AsyncTask<LeagueTableStanding, Void, List<Player>> {
+        private LeagueTableStanding mLeagueTableStanding;
+
+        @Override
+        protected List<Player> doInBackground(LeagueTableStanding... params) {
+            mLeagueTableStanding = params[0];
+            List<Player> results = new ArrayList<>();
+            try {
+                JSONArray players = WebServiceUtils.getJSONObjectFromUrl(
+                        mLeagueTableStanding.getTeamLink() + WebServiceURLs.INCOMPLETE_GET_TEAM_PLAYERS)
+                        .getJSONArray(JsonKeys.JSON_PLAYERS);
+                JSONObject player;
+                for (int i = 0; i < players.length(); i++) {
+                    player = players.getJSONObject(i);
+                    results.add(new Player(player));
+                }
+            } catch (JSONException | NullPointerException | ParseException e) {
+                e.printStackTrace();
+            }
+            return results;
+        }
+
+        @Override
+        protected void onPostExecute(List<Player> players) {
+            mTeamPlayers = players;
+            mFetchPlayers = true;
+            if (mFetchTeam) {
+                mProgressDialog.dismiss();
+                mTeam.getPlayers().addAll(mTeamPlayers);
+                Intent callTeamDetailsActivity = new Intent(getActivity(),
+                        TeamDetailsActivity.class);
+                callTeamDetailsActivity.putExtra(EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
+                callTeamDetailsActivity.putExtra(EXTRA_TEAM, mTeam);
+                startActivity(callTeamDetailsActivity);
+            }
         }
     }
 }
