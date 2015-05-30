@@ -19,6 +19,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.ksoichiro.android.observablescrollview.ObservableListView;
+
 import java.sql.Array;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class TeamDetailsFragment extends Fragment {
     //UI Components
     private Toolbar mToolbar;
     private TextView mMarketValueTextView;
-    private ListView mPlayersListView;
+    private ObservableListView mPlayersListView;
 
     /**
      * Current team to show
@@ -77,7 +79,7 @@ public class TeamDetailsFragment extends Fragment {
                 mLeagueTableStanding.getPoints().toString());
         standingView.setBackgroundColor(mLeagueTableStanding.getBackgroundColor());
 
-        mPlayersListView = (ListView) v.findViewById(R.id.playersListView);
+        mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
         mPlayersListView.setAdapter(new PlayersAdapter(mTeam.getPlayers()));
         return v;
     }

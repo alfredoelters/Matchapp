@@ -6,7 +6,13 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
-        style="@style/toolbarStyle" />
+        style="@style/toolbarStyle" >
+        <ImageView
+            android:src="@drawable/abc_list_pressed_holo_light"
+            android:id="@+id/teamCrestImageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        </android.support.v7.widget.Toolbar>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -175,7 +181,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <ListView
+        <com.github.ksoichiro.android.observablescrollview.ObservableListView
             android:id="@+id/playersListView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

@@ -2,10 +2,13 @@ package android.clase.obligatorio1.fragments;
 
 
 import android.clase.obligatorio1.R;
+import android.clase.obligatorio1.constants.JsonKeys;
 import android.clase.obligatorio1.entities.Fixture;
 import android.clase.obligatorio1.entities.Match;
+import android.clase.obligatorio1.entities.Team;
 import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -67,12 +70,22 @@ public class FixtureDetailsFragment extends Fragment {
     private Fixture mFixture;
 
 
+    private Team mHomeTeam;
+    private Team mAwayTeam;
+
+//    private FetchFixtureTask mFetchFixtureTask;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent homeScreenIntent = getActivity().getIntent();
-        mFixture = (Fixture) homeScreenIntent.getExtras().getSerializable(HomeFragment.EXTRA_MATCH);
-        mLeagueName = homeScreenIntent.getExtras().getString(HomeFragment.EXTRA_LEAGUE_NAME);
+        Bundle extras = homeScreenIntent.getExtras();
+        mFixture = (Fixture) extras.getSerializable(HomeFragment.EXTRA_MATCH);
+        mHomeTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_HOME_TEAM);
+        mHomeTeam.setCrestImage(extras.<Bitmap>getParcelable(HomeFragment.EXTRA_HOME_TEAM_CREST));
+        mAwayTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_AWAY_TEAM);
+        mAwayTeam.setCrestImage(extras.<Bitmap>getParcelable(HomeFragment.EXTRA_AWAY_TEAM_CREST));
+        mLeagueName = extras.getString(HomeFragment.EXTRA_LEAGUE_NAME);
     }
 
     @Nullable
@@ -118,12 +131,7 @@ public class FixtureDetailsFragment extends Fragment {
         //If match status isn't finished, the API returns -1 goals for both teams.
         mHomeTeamScoreTextView.setText(homeTeamScore != -1 ? homeTeamScore.toString() : " - ");
         mAwayTeamTextView.setText(mFixture.getAwayTeam().getName());
-        Integer awayTeamScore = mFixture.getGoalsAwayTeam();
-        mAwayTeamScoreTextView.setText(awayTeamScore != -1 ? awayTeamScore.toString() : " - ");
-        mHomeTeamNameH2H.setText(mFixture.getHomeTeam().getName());
-        mAwayTeamNameH2H.setText(mFixture.getAwayTeam().getName());
-        mHomeTeamWins.setText(mFixture.getHead2Head().getHomeTeamWins().toString());
-        mAwayTeamWins.setText(mFixture.getHead2Head().getAwayTeamWins().toString());
+        //Need to transform the value to a string
         mDraws.setText(mFixture.getHead2Head().getDraws().toString());
         mHeadToHeadListView.setAdapter(new MatchAdapter(mFixture.getHead2Head().getFixtures()));
     }
