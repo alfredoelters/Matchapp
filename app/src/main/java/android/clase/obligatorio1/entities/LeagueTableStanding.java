@@ -1,6 +1,7 @@
 package android.clase.obligatorio1.entities;
 
 import android.clase.obligatorio1.constants.JsonKeys;
+import android.graphics.Color;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +13,8 @@ import java.io.Serializable;
  * Class to represent a row of the positions table of a league returned by the Web Service.
  */
 public class LeagueTableStanding implements Serializable {
+    private String teamLink;
+
     private Integer position;
     private String teamName;
     private Integer playedGames;
@@ -19,6 +22,8 @@ public class LeagueTableStanding implements Serializable {
     private Integer goals;
     private Integer goalsAgainst;
     private Integer goalDifference;
+
+    private int backgroundColor;
 
 
     public LeagueTableStanding(JSONObject json) throws JSONException {
@@ -30,6 +35,8 @@ public class LeagueTableStanding implements Serializable {
             goals = json.getInt(JsonKeys.JSON_GOALS);
             goalsAgainst = json.getInt(JsonKeys.JSON_GOALS_AGAINST);
             goalDifference = json.getInt(JsonKeys.JSON_GOALS_DIFFERENCE);
+            teamLink = json.getJSONObject(JsonKeys.JSON_LINKS)
+                    .getJSONObject(JsonKeys.JSON_TEAM_LINK).getString(JsonKeys.JSON_HREF);
         }
     }
 
@@ -87,5 +94,21 @@ public class LeagueTableStanding implements Serializable {
 
     public void setTeamName(String teamName) {
         this.teamName = teamName;
+    }
+
+    public String getTeamLink() {
+        return teamLink;
+    }
+
+    public void setTeamLink(String teamLink) {
+        this.teamLink = teamLink;
+    }
+
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 }

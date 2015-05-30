@@ -48,6 +48,7 @@ public class JsonKeys {
     public static final String JSON_NAME = "name";
     public static final String JSON_JERSEY_NUMBER = "jerseyNumber";
     public static final String JSON_NATIONALITY = "nationality";
+    public static final String JSON_SQUAD_MARKET_VALUE = "squadMarketValue";
     public static final String JSON_MARKET_VALUE = "marketValue";
     public static final String JSON_DATE_OF_BIRTH = "dateOfBirth";
     public static final String JSON_CONTRACT_UNTIL = "contractUntil";
@@ -63,5 +64,6 @@ public class JsonKeys {
     public static final String JSON_CODE = "code";
     public static final String JSON_SHORT_NAME = "shortName";
     public static final String JSON_CREST_URL = "crestUrl";
+    public static final String JSON_PLAYERS = "players";
 
 }

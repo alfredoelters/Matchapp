@@ -22,6 +22,9 @@ public class WebServiceURLs {
     //E.g. = GET http://api.football-data.org/teams/19
     public static final String GET_TEAM_BY_ID = WEB_SERVICE_ENDPOINT + "teams/%d";
 
+    //E.g. = GET http://api.football-data.org/teams/19/players
+    public static final String INCOMPLETE_GET_TEAM_PLAYERS = "/players";
+
 
     //----------------Fixtures WS methods----------------
 

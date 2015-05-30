@@ -32,7 +32,7 @@ public class Player implements Serializable {
         jerseyNumber = json.getInt(JsonKeys.JSON_JERSEY_NUMBER);
         nationality = json.getString(JsonKeys.JSON_NATIONALITY);
         marketValue = json.getString(JsonKeys.JSON_MARKET_VALUE);
-        responseDateFormat = new SimpleDateFormat("YYYY-MM-dd");
+        responseDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         dateOfBirth = responseDateFormat.parse(json.getString(JsonKeys.JSON_DATE_OF_BIRTH));
         contractUntil = responseDateFormat.parse(json.getString(JsonKeys.JSON_CONTRACT_UNTIL));
     }
