@@ -26,6 +26,7 @@
     <string name="search_hint">Search a team</string>
     <string name="versus">VS</string>
     <string name="draws">Draws</string>
+    <string name="score_separator">-</string>
 
     <!--Fixture Details Screen Dummy Strings-->
     <string name="dummy_league_name">League Name</string>
@@ -40,6 +41,7 @@
     <string name="dummy_home_team_wins">5</string>
     <string name="dummy_draws">2</string>
     <string name="dummy_away_team_wins">3</string>
+    <string name="dummy_h2h_match_date">01/01/2014</string>
 
     <!--League Table Screen -->
     <string name="playedGames">PG</string>

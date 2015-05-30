@@ -3,4 +3,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="toolbar_elevation">4dp</dimen>
+    <dimen name="card_view_inside_margin">5dp</dimen>
+    <dimen name="card_view_outside_horizontal_margin">16dp</dimen>
+    <dimen name="list_item_card_view_outside_vertical_margin">4dp</dimen>
+    <dimen name="card_view_outside_vertical_margin">8dp</dimen>
 </resources>
