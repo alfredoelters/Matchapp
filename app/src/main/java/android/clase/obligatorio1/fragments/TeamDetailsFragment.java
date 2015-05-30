@@ -61,9 +61,14 @@ public class TeamDetailsFragment extends Fragment {
         mToolbar.setTitle(mTeam.getName());
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mMarketValueTextView = (TextView) v.findViewById(R.id.marketValueTextView);
+
+        mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
+
+        View playersViewHeader = inflater.inflate(R.layout.team_details_fragment_header,
+                mPlayersListView, false);
+        mMarketValueTextView = (TextView) playersViewHeader.findViewById(R.id.marketValueTextView);
         mMarketValueTextView.setText(mTeam.getSquadMarketValue());
-        View standingView = v.findViewById(R.id.standingLayout);
+        View standingView = playersViewHeader.findViewById(R.id.standingLayout);
         ((TextView)standingView.findViewById(R.id.positionTextView)).setText(
                 mLeagueTableStanding.getPosition().toString());
         standingView.findViewById(R.id.teamTextView).setVisibility(View.GONE);
@@ -78,8 +83,7 @@ public class TeamDetailsFragment extends Fragment {
         ((TextView)standingView.findViewById(R.id.pointsTextView)).setText(
                 mLeagueTableStanding.getPoints().toString());
         standingView.setBackgroundColor(mLeagueTableStanding.getBackgroundColor());
-
-        mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
+        mPlayersListView.addHeaderView(playersViewHeader, null, false);
         mPlayersListView.setAdapter(new PlayersAdapter(mTeam.getPlayers()));
         return v;
     }

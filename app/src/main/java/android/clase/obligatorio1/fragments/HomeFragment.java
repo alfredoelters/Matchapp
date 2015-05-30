@@ -233,6 +233,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                 }
             });
         }
+        menu.getItem(1).setVisible(false);
     }
 
     @Override
@@ -417,20 +418,20 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
      * Method to call FixtureDetailsActivity in case all required data has been fetched
      */
     public void tryCallFixtureDetailsActivity() {
-//        if (mFetchedFixture != null && mHomeTeamCrest != null && mAwayTeamCrest != null
-//                && mHomeTeam != null && mAwayTeam != null) {
-            mProgressDialog.dismiss();
-            //When finished fetching fixture info, start fixture detail activity.
-            Intent callFixtureDetailsActivity = new Intent(getActivity(),
-                    FixtureDetailsActivity.class);
-            callFixtureDetailsActivity.putExtra(EXTRA_MATCH, mFetchedFixture);
-            callFixtureDetailsActivity.putExtra(EXTRA_LEAGUE_NAME, mMatch.getLeagueCaption());
-            callFixtureDetailsActivity.putExtra(EXTRA_HOME_TEAM_CREST, mHomeTeamCrest);
-            callFixtureDetailsActivity.putExtra(EXTRA_AWAY_TEAM_CREST, mAwayTeamCrest);
-            callFixtureDetailsActivity.putExtra(EXTRA_HOME_TEAM, mHomeTeam);
-            callFixtureDetailsActivity.putExtra(EXTRA_AWAY_TEAM, mAwayTeam);
-            startActivity(callFixtureDetailsActivity);
-//        }
+        if (mFetchedFixture != null && mHomeTeamCrest != null && mAwayTeamCrest != null
+                && mHomeTeam != null && mAwayTeam != null) {
+        mProgressDialog.dismiss();
+        //When finished fetching fixture info, start fixture detail activity.
+        Intent callFixtureDetailsActivity = new Intent(getActivity(),
+                FixtureDetailsActivity.class);
+        callFixtureDetailsActivity.putExtra(EXTRA_MATCH, mFetchedFixture);
+        callFixtureDetailsActivity.putExtra(EXTRA_LEAGUE_NAME, mMatch.getLeagueCaption());
+        callFixtureDetailsActivity.putExtra(EXTRA_HOME_TEAM_CREST, mHomeTeamCrest);
+        callFixtureDetailsActivity.putExtra(EXTRA_AWAY_TEAM_CREST, mAwayTeamCrest);
+        callFixtureDetailsActivity.putExtra(EXTRA_HOME_TEAM, mHomeTeam);
+        callFixtureDetailsActivity.putExtra(EXTRA_AWAY_TEAM, mAwayTeam);
+        startActivity(callFixtureDetailsActivity);
+        }
     }
 
     /**
@@ -671,6 +672,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    //Set required information to null and start all async tasks necessary
+                    // to fetch it
                     mFetchedFixture = null;
                     mHomeTeam = null;
                     mAwayTeam = null;
