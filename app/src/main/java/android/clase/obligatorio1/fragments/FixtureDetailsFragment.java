@@ -4,16 +4,13 @@ package android.clase.obligatorio1.fragments;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.entities.Fixture;
 import android.clase.obligatorio1.entities.Match;
-import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -21,12 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Text;
-
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -80,7 +72,7 @@ public class FixtureDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_fixutre_details, container, false);
         //To add a header to a ListView, you must create a separated layout and inflate it too.
-        View headToHeadListViewHeader = inflater.inflate(R.layout.fixture_fragment_details_header, mHeadToHeadListView, false);
+        View headToHeadListViewHeader = inflater.inflate(R.layout.fragment_fixture_details_header, mHeadToHeadListView, false);
         mMatchDayTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchDayTextView);
         mMatchDateTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchDateTextView);
         mMatchStatusTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchStatusTextView);
