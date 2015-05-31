@@ -1,5 +1,6 @@
 package android.clase.obligatorio1.fragments;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.activities.TeamDetailsActivity;
@@ -11,6 +12,7 @@ import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
 import android.clase.obligatorio1.utils.WebServiceUtils;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -56,6 +58,7 @@ public class LeagueTableFragment extends Fragment {
     private Toolbar mToolbar;
     private ObservableListView mStandingsListView;
     private ProgressDialog mProgressDialog;
+    private AlertDialog mAlertDialog;
 
 
     /**
@@ -141,6 +144,17 @@ public class LeagueTableFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
+
+        mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.alertErrorTittle)
+                .setMessage(R.string.alertError)
+                .setIcon(android.R.drawable.ic_dialog_alert).setNeutralButton(R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mAlertDialog.dismiss();
+                            }
+                        }).create();
+        mAlertDialog.dismiss();
         return v;
     }
 
@@ -201,12 +215,19 @@ public class LeagueTableFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    /**
+     * Method to cancel all running asyncTasks
+     */
+    private void cancelAllAsyncTasks(){
         if (mFetchTeamDetailsTask != null && mFetchTeamDetailsTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchTeamDetailsTask.cancel(true);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        cancelAllAsyncTasks();
     }
 
     private class LeagueStandingsAdapter extends ArrayAdapter<LeagueTableStanding> implements Filterable {
@@ -312,6 +333,15 @@ public class LeagueTableFragment extends Fragment {
         }
     }
 
+    /**
+     * Method to notify the user of errors when trying to fetch data from the WS
+     */
+    private void errorOccurredInAsyncTasks(){
+        cancelAllAsyncTasks();
+        mProgressDialog.dismiss();
+        mAlertDialog.show();
+    }
+
     private class FetchTeamDetailsTask extends AsyncTask<LeagueTableStanding, Void, Void> {
         private LeagueTableStanding mLeagueTableStanding;
 
@@ -349,7 +379,7 @@ public class LeagueTableFragment extends Fragment {
                     startActivity(callTeamDetailsActivity);
                 }
             } else {
-                //TODO handle error
+                errorOccurredInAsyncTasks();
             }
         }
     }

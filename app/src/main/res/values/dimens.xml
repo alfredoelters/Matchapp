@@ -7,4 +7,6 @@
     <dimen name="card_view_outside_horizontal_margin">16dp</dimen>
     <dimen name="list_item_card_view_outside_vertical_margin">4dp</dimen>
     <dimen name="card_view_outside_vertical_margin">8dp</dimen>
+    <dimen name="flexible_space_height">72dp</dimen>
+    <dimen name="toolbar_margin_start">72dp</dimen>
 </resources>

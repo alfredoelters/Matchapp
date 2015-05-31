@@ -1,5 +1,6 @@
 package android.clase.obligatorio1.fragments;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.activities.FixtureDetailsActivity;
@@ -13,6 +14,7 @@ import android.clase.obligatorio1.entities.SoccerSeason;
 import android.clase.obligatorio1.entities.Team;
 import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -78,6 +80,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private View mHeaderView;
     private Toolbar mToolbar;
     private ProgressDialog mProgressDialog;
+    private AlertDialog mAlertDialog;
 
     /**
      * int to specify the translation of the toolbar based on the scrolling
@@ -206,6 +209,16 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         setHasOptionsMenu(true);
+        mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.alertErrorTittle)
+                .setMessage(R.string.alertError)
+                .setIcon(android.R.drawable.ic_dialog_alert).setNeutralButton(R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mAlertDialog.dismiss();
+                    }
+                }).create();
+        mAlertDialog.dismiss();
         return v;
     }
 
@@ -295,10 +308,19 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        //Finish all running async tasks
+    /**
+     * Method to notify the user of errors when trying to fetch data from the WS
+     */
+    private void errorOccurredInAsyncTasks(){
+        cancelAllAsyncTasks();
+        mProgressDialog.dismiss();
+        mAlertDialog.show();
+    }
+
+    /**
+     * Method to cancel all running async tasks
+     */
+    private void cancelAllAsyncTasks(){
         if (mLoadLeaguesTask != null && mLoadLeaguesTask.getStatus() != AsyncTask.Status.FINISHED) {
             mLoadLeaguesTask.cancel(true);
         }
@@ -323,6 +345,13 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         if (mFetchAwayTeamTask != null && mFetchAwayTeamTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchAwayTeamTask.cancel(true);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //Finish all running async tasks
+        cancelAllAsyncTasks();
 //        for (FetchMatchesTask task : mFetchMatchesTasks) {
 //            if (task != null && task.getStatus() != AsyncTask.Status.FINISHED) {
 //                task.cancel(true);
@@ -789,7 +818,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                 mFetchedFixture = fixture;
                 tryCallFixtureDetailsActivity();
             } else {
-                //TODO handle error
+                mProgressDialog.dismiss();
+
             }
         }
     }
@@ -831,7 +861,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                     mAwayTeamCrestTask = new DownloadCrestImageTask(getActivity(), false);
                     mAwayTeamCrestTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 } else {
-                    //TODO handle error
+                    errorOccurredInAsyncTasks();
                 }
             }
         }
@@ -868,7 +898,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                 }
                 tryCallFixtureDetailsActivity();
             } else {
-                //TODO handle error
+                errorOccurredInAsyncTasks();
             }
         }
     }
@@ -904,7 +934,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                 callLeagueTableActivity.putExtra(EXTRA_LEAGUE_TABLE, leagueTable);
                 startActivity(callLeagueTableActivity);
             } else {
-                //TODO handle error
+                errorOccurredInAsyncTasks();
             }
         }
     }

@@ -146,7 +146,7 @@ public class WebServiceUtils {
                 InputStream stream = connection.getInputStream();
                 // we will save the image on storage, as a jpg file
                 String filePath = context.getExternalFilesDir(null) + File.separator
-                        + auxiliaryFileName +".jpg";
+                        + auxiliaryFileName +".svg";
                 OutputStream outputStream = new FileOutputStream(filePath);
 
                 byte[] bytes = new byte[1024];

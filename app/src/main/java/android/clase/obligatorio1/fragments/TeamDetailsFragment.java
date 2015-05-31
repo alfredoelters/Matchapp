@@ -5,6 +5,7 @@ import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
+import android.clase.obligatorio1.utils.SingleFragmentActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,6 +21,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
+import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
+import com.github.ksoichiro.android.observablescrollview.ScrollState;
+import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
+import com.nineoldandroids.view.ViewHelper;
 
 import java.sql.Array;
 import java.util.List;
@@ -33,6 +38,7 @@ public class TeamDetailsFragment extends Fragment {
     private Toolbar mToolbar;
     private TextView mMarketValueTextView;
     private ObservableListView mPlayersListView;
+
 
     /**
      * Current team to show
@@ -62,10 +68,11 @@ public class TeamDetailsFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
 
+        mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
         View playersViewHeader = inflater.inflate(R.layout.team_details_fragment_header,
                 mPlayersListView, false);
+
         mMarketValueTextView = (TextView) playersViewHeader.findViewById(R.id.marketValueTextView);
         mMarketValueTextView.setText(mTeam.getSquadMarketValue());
         View standingView = playersViewHeader.findViewById(R.id.standingLayout);
@@ -87,6 +94,8 @@ public class TeamDetailsFragment extends Fragment {
         mPlayersListView.setAdapter(new PlayersAdapter(mTeam.getPlayers()));
         return v;
     }
+
+
 
     private class PlayersAdapter extends ArrayAdapter<Player> {
 
