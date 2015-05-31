@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -15,67 +16,53 @@
         android:orientation="horizontal">
 
         <TextView
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:textSize="18sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/tableHeaderTextViewStyle"
             android:text="@string/position" />
 
         <TextView
-            android:textSize="18sp"
-            android:textColor="@color/white"
-            android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="4"
+            style="@style/tableHeaderTextViewStyle"
             android:text="@string/team" />
 
         <TextView
-            android:textSize="18sp"
-            android:textColor="@color/white"
-            android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/tableHeaderTextViewStyle"
             android:text="@string/playedGames" />
 
         <TextView
-            android:textSize="18sp"
-            android:textColor="@color/white"
-            android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/tableHeaderTextViewStyle"
             android:text="@string/goalsInFavor" />
 
         <TextView
-            android:textSize="18sp"
-            android:textColor="@color/white"
-            android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/tableHeaderTextViewStyle"
             android:text="@string/goalsAgainst" />
 
         <TextView
-            android:textSize="18sp"
-            android:textColor="@color/white"
-            android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/tableHeaderTextViewStyle"
             android:text="@string/goalsDifference" />
 
         <TextView
-            android:textSize="18sp"
-            android:textColor="@color/white"
             android:textStyle="bold"
-            android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/tableHeaderTextViewStyle"
             android:text="@string/points" />
     </LinearLayout>
 
