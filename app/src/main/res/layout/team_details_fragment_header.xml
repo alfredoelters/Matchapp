@@ -2,9 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/teamCrestImageView"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/download"/>
 
     <LinearLayout
+        android:id="@+id/marketValueLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -45,55 +55,43 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/position"
-                    android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    style="@style/tableHeaderTextViewStyle"
+                    android:text="@string/position" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/playedGames"
-                    android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    style="@style/tableHeaderTextViewStyle"
+                    android:text="@string/playedGames" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/goalsInFavor"
-                    android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    style="@style/tableHeaderTextViewStyle"
+                    android:text="@string/goalsInFavor" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/goalsAgainst"
-                    android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    style="@style/tableHeaderTextViewStyle"
+                    android:text="@string/goalsAgainst" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/goalsDifference"
-                    android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    style="@style/tableHeaderTextViewStyle"
+                    android:text="@string/goalsDifference"/>
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center"
+                    style="@style/tableHeaderTextViewStyle"
                     android:text="@string/points"
-                    android:textColor="@color/white"
-                    android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -105,6 +103,7 @@
     </android.support.v7.widget.CardView>
 
     <LinearLayout
+        android:id="@+id/playersSectionTittle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/dark_skyblue">
@@ -112,14 +111,12 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:text="@string/players"
-            android:textColor="@color/white"
-            android:textSize="20dp" />
+            style="@style/headerTextViewStyle"
+            android:text="@string/players"/>
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/playersTableTittle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/skyblue"
@@ -136,33 +133,29 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
                 android:text="@string/squadNumber"
-                android:textColor="@color/white" />
+                style="@style/subTableHeaderTextViewStyle" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
-                android:gravity="center"
                 android:text="@string/name"
-                android:textColor="@color/white" />
+                style="@style/subTableHeaderTextViewStyle" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
-                android:gravity="center"
                 android:text="@string/playerPosition"
-                android:textColor="@color/white" />
+                style="@style/subTableHeaderTextViewStyle" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:gravity="center"
                 android:text="@string/nationality"
-                android:textColor="@color/white" />
+                style="@style/subTableHeaderTextViewStyle"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

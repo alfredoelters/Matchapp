@@ -5,8 +5,6 @@ import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
-import android.clase.obligatorio1.utils.SingleFragmentActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,16 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
-import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
-import com.github.ksoichiro.android.observablescrollview.ScrollState;
-import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
-import com.nineoldandroids.view.ViewHelper;
 
-import java.sql.Array;
 import java.util.List;
 
 /**
@@ -38,6 +31,7 @@ public class TeamDetailsFragment extends Fragment {
     private Toolbar mToolbar;
     private TextView mMarketValueTextView;
     private ObservableListView mPlayersListView;
+    private ImageView teamCrestImageView;
 
 
     /**
@@ -68,33 +62,44 @@ public class TeamDetailsFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
         mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
         View playersViewHeader = inflater.inflate(R.layout.team_details_fragment_header,
                 mPlayersListView, false);
 
+        teamCrestImageView = (ImageView) playersViewHeader.findViewById(R.id.teamCrestImageView);
         mMarketValueTextView = (TextView) playersViewHeader.findViewById(R.id.marketValueTextView);
-        mMarketValueTextView.setText(mTeam.getSquadMarketValue());
+        String marketValue = mTeam.getSquadMarketValue();
+        if (marketValue == null || marketValue.equals("null")) {
+            //Hide market value linear layout in case there is no information about it.
+            playersViewHeader.findViewById(R.id.marketValueLinearLayout).setVisibility(View.GONE);
+        } else {
+            mMarketValueTextView.setText(mTeam.getSquadMarketValue());
+        }
         View standingView = playersViewHeader.findViewById(R.id.standingLayout);
-        ((TextView)standingView.findViewById(R.id.positionTextView)).setText(
+        ((TextView) standingView.findViewById(R.id.positionTextView)).setText(
                 mLeagueTableStanding.getPosition().toString());
         standingView.findViewById(R.id.teamTextView).setVisibility(View.GONE);
-        ((TextView)standingView.findViewById(R.id.playedGamesTextView)).setText(
+        ((TextView) standingView.findViewById(R.id.playedGamesTextView)).setText(
                 mLeagueTableStanding.getPlayedGames().toString());
-        ((TextView)standingView.findViewById(R.id.goalsInFavorTextView)).setText(
+        ((TextView) standingView.findViewById(R.id.goalsInFavorTextView)).setText(
                 mLeagueTableStanding.getGoals().toString());
-        ((TextView)standingView.findViewById(R.id.goalsAgainstTextView)).setText(
+        ((TextView) standingView.findViewById(R.id.goalsAgainstTextView)).setText(
                 mLeagueTableStanding.getGoalsAgainst().toString());
-        ((TextView)standingView.findViewById(R.id.goalsDifferenceTextView)).setText(
+        ((TextView) standingView.findViewById(R.id.goalsDifferenceTextView)).setText(
                 mLeagueTableStanding.getGoalDifference().toString());
-        ((TextView)standingView.findViewById(R.id.pointsTextView)).setText(
+        ((TextView) standingView.findViewById(R.id.pointsTextView)).setText(
                 mLeagueTableStanding.getPoints().toString());
         standingView.setBackgroundColor(mLeagueTableStanding.getBackgroundColor());
+        //Add the header to the listView so that it is also scrolled.
         mPlayersListView.addHeaderView(playersViewHeader, null, false);
         mPlayersListView.setAdapter(new PlayersAdapter(mTeam.getPlayers()));
+        if (mTeam.getPlayers().isEmpty()) {
+            //Hide players table is there is no information of them.
+            playersViewHeader.findViewById(R.id.playersSectionTittle).setVisibility(View.GONE);
+            playersViewHeader.findViewById(R.id.playersTableTittle).setVisibility(View.GONE);
+        }
         return v;
     }
-
 
 
     private class PlayersAdapter extends ArrayAdapter<Player> {
