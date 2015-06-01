@@ -5,6 +5,7 @@ import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
+import android.clase.obligatorio1.utils.SingleFragmentActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +20,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.ksoichiro.android.observablescrollview.ObservableListView;
+import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
+import com.github.ksoichiro.android.observablescrollview.ScrollState;
+import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
+import com.nineoldandroids.view.ViewHelper;
+
 import java.sql.Array;
 import java.util.List;
 
@@ -30,7 +37,8 @@ public class TeamDetailsFragment extends Fragment {
     //UI Components
     private Toolbar mToolbar;
     private TextView mMarketValueTextView;
-    private ListView mPlayersListView;
+    private ObservableListView mPlayersListView;
+
 
     /**
      * Current team to show
@@ -59,9 +67,15 @@ public class TeamDetailsFragment extends Fragment {
         mToolbar.setTitle(mTeam.getName());
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mMarketValueTextView = (TextView) v.findViewById(R.id.marketValueTextView);
+
+
+        mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
+        View playersViewHeader = inflater.inflate(R.layout.team_details_fragment_header,
+                mPlayersListView, false);
+
+        mMarketValueTextView = (TextView) playersViewHeader.findViewById(R.id.marketValueTextView);
         mMarketValueTextView.setText(mTeam.getSquadMarketValue());
-        View standingView = v.findViewById(R.id.standingLayout);
+        View standingView = playersViewHeader.findViewById(R.id.standingLayout);
         ((TextView)standingView.findViewById(R.id.positionTextView)).setText(
                 mLeagueTableStanding.getPosition().toString());
         standingView.findViewById(R.id.teamTextView).setVisibility(View.GONE);
@@ -76,11 +90,12 @@ public class TeamDetailsFragment extends Fragment {
         ((TextView)standingView.findViewById(R.id.pointsTextView)).setText(
                 mLeagueTableStanding.getPoints().toString());
         standingView.setBackgroundColor(mLeagueTableStanding.getBackgroundColor());
-
-        mPlayersListView = (ListView) v.findViewById(R.id.playersListView);
+        mPlayersListView.addHeaderView(playersViewHeader, null, false);
         mPlayersListView.setAdapter(new PlayersAdapter(mTeam.getPlayers()));
         return v;
     }
+
+
 
     private class PlayersAdapter extends ArrayAdapter<Player> {
 

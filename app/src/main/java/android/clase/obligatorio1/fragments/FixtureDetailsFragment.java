@@ -4,7 +4,11 @@ package android.clase.obligatorio1.fragments;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.entities.Fixture;
 import android.clase.obligatorio1.entities.Match;
+import android.clase.obligatorio1.entities.Team;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,10 +18,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.larvalabs.svgandroid.SVG;
+import com.larvalabs.svgandroid.SVGParser;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,6 +58,8 @@ public class FixtureDetailsFragment extends Fragment {
     private Toolbar mToolbar;
     private ListView mHeadToHeadListView;
     private LinearLayout mMatchDetailsLinearLayout;
+    private ImageView mHomeTeamLogo;
+    private ImageView mAwayTeamLogo;
 
     /**
      * League name obtained from the HomeActivity
@@ -59,12 +72,20 @@ public class FixtureDetailsFragment extends Fragment {
     private Fixture mFixture;
 
 
+    private Team mHomeTeam;
+    private Team mAwayTeam;
+
+//    private FetchFixtureTask mFetchFixtureTask;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent homeScreenIntent = getActivity().getIntent();
-        mFixture = (Fixture) homeScreenIntent.getExtras().getSerializable(HomeFragment.EXTRA_MATCH);
-        mLeagueName = homeScreenIntent.getExtras().getString(HomeFragment.EXTRA_LEAGUE_NAME);
+        Bundle extras = homeScreenIntent.getExtras();
+        mFixture = (Fixture) extras.getSerializable(HomeFragment.EXTRA_MATCH);
+        mHomeTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_HOME_TEAM);
+        mAwayTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_AWAY_TEAM);
+        mLeagueName = extras.getString(HomeFragment.EXTRA_LEAGUE_NAME);
     }
 
     @Nullable
@@ -77,9 +98,13 @@ public class FixtureDetailsFragment extends Fragment {
         mMatchDateTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchDateTextView);
         mMatchStatusTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchStatusTextView);
         mMatchStartTimeTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchStartTimeTextView);
+        mHomeTeamLogo = (ImageView) headToHeadListViewHeader.findViewById(R.id.homeTeamImageView);
+        mHomeTeamLogo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mHomeTeamTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.homeTeamTextView);
         mHomeTeamScoreTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.homeTeamScoreTextView);
         mAwayTeamTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.awayTeamTextView);
+        mAwayTeamLogo = (ImageView) headToHeadListViewHeader.findViewById(R.id.awayTeamImageView);
+        mAwayTeamLogo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mAwayTeamScoreTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.awayTeamScoreTextView);
         mHomeTeamNameH2H = (TextView) headToHeadListViewHeader.findViewById(R.id.home_team_name_h2h);
         mAwayTeamNameH2H = (TextView) headToHeadListViewHeader.findViewById(R.id.away_team_name_h2h);
@@ -106,11 +131,30 @@ public class FixtureDetailsFragment extends Fragment {
         mMatchDateTextView.setText(MATCH_DATE_FORMAT.format(matchDate));
         mMatchStartTimeTextView.setText(getString(R.string.startTime) + MATCH_TIME_FORMAT.format(matchDate));
         mHomeTeamTextView.setText(mFixture.getHomeTeam().getName());
+        File homeLogo = getActivity().getFileStreamPath(HomeFragment.HOME_CREST_FILE);
+        try {
+            SVG homeLogoSVG = SVGParser.getSVGFromInputStream(new FileInputStream(homeLogo));
+            Drawable homeLogoDrawable = homeLogoSVG.createPictureDrawable();
+            mAwayTeamLogo.setImageDrawable(homeLogoDrawable != null ? homeLogoDrawable
+                    : getResources().getDrawable(R.mipmap.ic_launcher));
+        } catch (Exception e) {
+            mAwayTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+        }
         Integer homeTeamScore = mFixture.getGoalsHomeTeam();
         //If match status isn't finished, the API returns -1 goals for both teams.
         mHomeTeamScoreTextView.setText(homeTeamScore != -1 ? homeTeamScore.toString() : " - ");
         mAwayTeamTextView.setText(mFixture.getAwayTeam().getName());
         Integer awayTeamScore = mFixture.getGoalsAwayTeam();
+        File awayLogo = getActivity().getFileStreamPath(HomeFragment.AWAY_CREST_FILE);
+        try {
+            SVG awayLogoSVG = SVGParser.getSVGFromInputStream(new FileInputStream(awayLogo));
+            Drawable awayLogoDrawable = awayLogoSVG.createPictureDrawable();
+            mAwayTeamLogo.setImageDrawable(awayLogoDrawable != null ? awayLogoDrawable
+                    : getResources().getDrawable(R.mipmap.ic_launcher));
+        } catch (Exception e) {
+            mAwayTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+        }
+        //If match status isn't finished, the API returns -1 goals for both teams.
         mAwayTeamScoreTextView.setText(awayTeamScore != -1 ? awayTeamScore.toString() : " - ");
         mHomeTeamNameH2H.setText(mFixture.getHomeTeam().getName());
         mAwayTeamNameH2H.setText(mFixture.getAwayTeam().getName());

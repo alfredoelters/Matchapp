@@ -35,8 +35,11 @@ public class Match implements Serializable, Comparable {
     private Integer goalsHomeTeam;
     private Integer goalsAwayTeam;
     private String leagueCaption;
+
     private String selfLink;
     private String soccerSeasonLink;
+    private String homeTeamLink;
+    private String awayTeamLink;
 
 
     public Match(JSONObject json) throws JSONException, ParseException {
@@ -47,10 +50,15 @@ public class Match implements Serializable, Comparable {
             JSONObject result = json.getJSONObject(JsonKeys.JSON_RESULT);
             goalsHomeTeam = result.getInt(JsonKeys.JSON_GOALS_HOME_TEAM);
             goalsAwayTeam = result.getInt(JsonKeys.JSON_GOALS_AWAY_TEAM);
-            selfLink = json.getJSONObject(JsonKeys.JSON_LINKS)
-                    .getJSONObject(JsonKeys.JSON_SELF_LINK).getString(JsonKeys.JSON_HREF);
-            soccerSeasonLink = json.getJSONObject(JsonKeys.JSON_LINKS)
-                    .getJSONObject(JsonKeys.JSON_SOCCER_SEASON_LINK).getString(JsonKeys.JSON_HREF);
+            JSONObject links = json.getJSONObject(JsonKeys.JSON_LINKS);
+            selfLink = links.getJSONObject(JsonKeys.JSON_SELF_LINK)
+                    .getString(JsonKeys.JSON_HREF);
+            soccerSeasonLink = links.getJSONObject(JsonKeys.JSON_SOCCER_SEASON_LINK)
+                    .getString(JsonKeys.JSON_HREF);
+            homeTeamLink = links.getJSONObject(JsonKeys.JSON_HOME_TEAM_LINK)
+                    .getString(JsonKeys.JSON_HREF);
+            awayTeamLink = links.getJSONObject(JsonKeys.JSON_AWAY_TEAM_LINK)
+                    .getString(JsonKeys.JSON_HREF);
         }
     }
 
@@ -123,5 +131,21 @@ public class Match implements Serializable, Comparable {
         if (!(another instanceof Match))
             return -1;
         return -((Match)another).getLeagueCaption().compareTo(leagueCaption);
+    }
+
+    public String getHomeTeamLink() {
+        return homeTeamLink;
+    }
+
+    public void setHomeTeamLink(String homeTeamLink) {
+        this.homeTeamLink = homeTeamLink;
+    }
+
+    public String getAwayTeamLink() {
+        return awayTeamLink;
+    }
+
+    public void setAwayTeamLink(String awayTeamLink) {
+        this.awayTeamLink = awayTeamLink;
     }
 }

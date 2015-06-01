@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">MatchApp</string>
 
+
     <!--Splash Screen -->
     <string name="alertErrorTittle"> Load Error </string>
     <string name="alertError">Could not load requested data.</string>
@@ -16,6 +17,7 @@
     <string name="pleaseWait">Please wait...</string>
     <string name="gettingMatch">Getting match info...</string>
     <string name="gettingLeagueTable">Getting league table info...</string>
+    <string name="ok">OK</string>
 
     <!--Fixture Details Screen -->
     <string name="home">Home</string>
