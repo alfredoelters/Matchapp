@@ -181,6 +181,7 @@ public class FixtureDetailsFragment extends Fragment {
         mMatchDayTextView.setText(getString(R.string.matchDay) + mFixture.getMatchDay());
         Date matchDate = mFixture.getDate();
         mMatchDateTextView.setText(MATCH_DATE_FORMAT.format(matchDate));
+        mMatchStatusTextView.setText(mFixture.getStatus());
         mMatchStartTimeTextView.setText(getString(R.string.startTime) + MATCH_TIME_FORMAT.format(matchDate));
         mHomeTeamTextView.setText(mFixture.getHomeTeam().getName());
         File homeLogo = getActivity().getFileStreamPath(HomeFragment.HOME_CREST_FILE);
