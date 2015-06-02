@@ -48,11 +48,6 @@ import java.util.List;
  * Created by alfredo on 20/05/15.
  */
 public class LeagueTableFragment extends Fragment {
-    /**
-     * Extra keys to send data to the TeamDetailsActivity
-     */
-    public static final String EXTRA_LEAGUE_STANDING = "leagueTableStanding";
-    public static final String EXTRA_TEAM = "team";
 
     //UI Components
     private Toolbar mToolbar;
@@ -113,6 +108,8 @@ public class LeagueTableFragment extends Fragment {
      * (for concurrency purposes)
      */
     private boolean mFetchPlayers;
+
+    private LeagueTableStanding mLeagueTableStanding;
 
 
     @Override
@@ -342,8 +339,17 @@ public class LeagueTableFragment extends Fragment {
         mAlertDialog.show();
     }
 
+    private void callTeamDetailsActivity(){
+        mProgressDialog.dismiss();
+        mTeam.getPlayers().addAll(mTeamPlayers);
+        Intent callTeamDetailsActivity = new Intent(getActivity(),
+                TeamDetailsActivity.class);
+        callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
+        callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_TEAM, mTeam);
+        startActivity(callTeamDetailsActivity);
+    }
+
     private class FetchTeamDetailsTask extends AsyncTask<LeagueTableStanding, Void, Void> {
-        private LeagueTableStanding mLeagueTableStanding;
 
         @Override
         protected void onPreExecute() {
@@ -370,13 +376,7 @@ public class LeagueTableFragment extends Fragment {
             if (mTeam != null) {
                 mFetchTeam = true;
                 if (mFetchPlayers) {
-                    mProgressDialog.dismiss();
-                    mTeam.getPlayers().addAll(mTeamPlayers);
-                    Intent callTeamDetailsActivity = new Intent(getActivity(),
-                            TeamDetailsActivity.class);
-                    callTeamDetailsActivity.putExtra(EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
-                    callTeamDetailsActivity.putExtra(EXTRA_TEAM, mTeam);
-                    startActivity(callTeamDetailsActivity);
+                    callTeamDetailsActivity();
                 }
             } else {
                 errorOccurredInAsyncTasks();
@@ -385,7 +385,6 @@ public class LeagueTableFragment extends Fragment {
     }
 
     private class FetchTeamPlayersTask extends AsyncTask<LeagueTableStanding, Void, List<Player>> {
-        private LeagueTableStanding mLeagueTableStanding;
 
         @Override
         protected List<Player> doInBackground(LeagueTableStanding... params) {
@@ -411,13 +410,7 @@ public class LeagueTableFragment extends Fragment {
             mTeamPlayers = players;
             mFetchPlayers = true;
             if (mFetchTeam) {
-                mProgressDialog.dismiss();
-                mTeam.getPlayers().addAll(mTeamPlayers);
-                Intent callTeamDetailsActivity = new Intent(getActivity(),
-                        TeamDetailsActivity.class);
-                callTeamDetailsActivity.putExtra(EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
-                callTeamDetailsActivity.putExtra(EXTRA_TEAM, mTeam);
-                startActivity(callTeamDetailsActivity);
+                callTeamDetailsActivity();
             }
         }
     }

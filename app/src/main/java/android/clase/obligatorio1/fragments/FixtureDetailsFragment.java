@@ -1,12 +1,21 @@
 package android.clase.obligatorio1.fragments;
 
 
+import android.app.ProgressDialog;
 import android.clase.obligatorio1.R;
+import android.clase.obligatorio1.activities.TeamDetailsActivity;
+import android.clase.obligatorio1.constants.JsonKeys;
+import android.clase.obligatorio1.constants.WebServiceURLs;
 import android.clase.obligatorio1.entities.Fixture;
+import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Match;
+import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
+import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,10 +36,16 @@ import android.widget.TextView;
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParser;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +75,16 @@ public class FixtureDetailsFragment extends Fragment {
     private LinearLayout mMatchDetailsLinearLayout;
     private ImageView mHomeTeamLogo;
     private ImageView mAwayTeamLogo;
+    private ProgressDialog mProgressDialog;
+
+    private FetchLeagueTableStandingTask mFetchLeagueTableStandingTask;
+
+    private FetchTeamPlayersTask mFetchPlayersTask;
+
+    private LeagueTableStanding mLeagueTableStanding;
+
+    private boolean mFetchedLeagueTableStanding;
+    private boolean mFetchedTeamPlayers;
 
     /**
      * League name obtained from the HomeActivity
@@ -82,10 +107,12 @@ public class FixtureDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Intent homeScreenIntent = getActivity().getIntent();
         Bundle extras = homeScreenIntent.getExtras();
-        mFixture = (Fixture) extras.getSerializable(HomeFragment.EXTRA_MATCH);
-        mHomeTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_HOME_TEAM);
-        mAwayTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_AWAY_TEAM);
-        mLeagueName = extras.getString(HomeFragment.EXTRA_LEAGUE_NAME);
+        if (extras != null) {
+            mFixture = (Fixture) extras.getSerializable(HomeFragment.EXTRA_MATCH);
+            mHomeTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_HOME_TEAM);
+            mAwayTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_AWAY_TEAM);
+            mLeagueName = extras.getString(HomeFragment.EXTRA_LEAGUE_NAME);
+        }
         setHasOptionsMenu(true);
     }
 
@@ -101,11 +128,35 @@ public class FixtureDetailsFragment extends Fragment {
         mMatchStartTimeTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchStartTimeTextView);
         mHomeTeamLogo = (ImageView) headToHeadListViewHeader.findViewById(R.id.homeTeamImageView);
         mHomeTeamLogo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        mHomeTeamLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mFetchedLeagueTableStanding = false;
+                mFetchedTeamPlayers = false;
+                mFetchLeagueTableStandingTask = new FetchLeagueTableStandingTask();
+                mFetchLeagueTableStandingTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, true);
+                mFetchPlayersTask = new FetchTeamPlayersTask();
+                mFetchPlayersTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,true);
+
+            }
+        });
         mHomeTeamTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.homeTeamTextView);
         mHomeTeamScoreTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.homeTeamScoreTextView);
         mAwayTeamTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.awayTeamTextView);
         mAwayTeamLogo = (ImageView) headToHeadListViewHeader.findViewById(R.id.awayTeamImageView);
         mAwayTeamLogo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
+        mAwayTeamLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mFetchedLeagueTableStanding = false;
+                mFetchedTeamPlayers = false;
+                mFetchLeagueTableStandingTask = new FetchLeagueTableStandingTask();
+                mFetchLeagueTableStandingTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, false);
+                mFetchPlayersTask = new FetchTeamPlayersTask();
+                mFetchPlayersTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,false);
+            }
+        });
         mAwayTeamScoreTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.awayTeamScoreTextView);
         mHomeTeamNameH2H = (TextView) headToHeadListViewHeader.findViewById(R.id.home_team_name_h2h);
         mAwayTeamNameH2H = (TextView) headToHeadListViewHeader.findViewById(R.id.away_team_name_h2h);
@@ -192,7 +243,7 @@ public class FixtureDetailsFragment extends Fragment {
                         .append(MATCH_TIME_FORMAT.format(mFixture.getDate())).append(" \n")
                         .append(mFixture.getHomeTeam().getName()).append(" ").append(matchFinished ?
                                 mFixture.getGoalsHomeTeam() : "").append(" - ").append(matchFinished ?
-                                mFixture.getGoalsAwayTeam():"").append(" ")
+                                mFixture.getGoalsAwayTeam() : "").append(" ")
                         .append(mFixture.getAwayTeam().getName())
                         .append("\n").append(mFixture.getStatus())
                         .append("\n").append(getString(R.string.share_message)).append(" ")
@@ -210,6 +261,26 @@ public class FixtureDetailsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mFetchLeagueTableStandingTask != null && mFetchLeagueTableStandingTask.getStatus()
+                != AsyncTask.Status.FINISHED) {
+            mFetchLeagueTableStandingTask.cancel(true);
+        }
+        if (mFetchPlayersTask != null && mFetchPlayersTask.getStatus()
+                != AsyncTask.Status.FINISHED) {
+            mFetchPlayersTask.cancel(true);
+        }
+    }
+
+    private void tryCallTeamDetailsActivity(boolean isHome) {
+        if (mFetchedLeagueTableStanding && mFetchedTeamPlayers) {
+            mProgressDialog.dismiss();
+            Intent callTeamDetailsActivity = new Intent(getActivity(),
+                    TeamDetailsActivity.class);
+            callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
+            callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_TEAM, isHome ?
+                    mHomeTeam : mAwayTeam);
+            startActivity(callTeamDetailsActivity);
+        }
     }
 
     private class MatchAdapter extends ArrayAdapter<Match> {
@@ -239,6 +310,98 @@ public class FixtureDetailsFragment extends Fragment {
             awayTeamScore.setText(match.getGoalsAwayTeam().toString());
             return convertView;
         }
-
     }
+
+    private class FetchLeagueTableStandingTask extends AsyncTask<Boolean, Void, LeagueTableStanding> {
+        private Boolean isHome;
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.pleaseWait),
+                    getString(R.string.gettingTeam));
+        }
+
+        @Override
+        protected LeagueTableStanding doInBackground(Boolean... params) {
+            LeagueTableStanding result = null;
+            isHome = params[0];
+            try {
+                JSONObject leagueTable = WebServiceUtils.getJSONObjectFromUrl(
+                        mFixture.getSoccerSeasonLink() +
+                                WebServiceURLs.INCOMPLETE_GETE_LEAGUETABLE);
+                JSONArray standingsJson = leagueTable.getJSONArray(JsonKeys.JSON_STANDING);
+                JSONObject standing;
+                if (leagueTable != null) {
+                    for (int i = 0; i < standingsJson.length(); i++) {
+                        standing = standingsJson.getJSONObject(i);
+                        if (standing.getJSONObject(JsonKeys.JSON_LINKS)
+                                .getJSONObject(JsonKeys.JSON_TEAM_LINK).getString(JsonKeys.JSON_HREF)
+                                .equals(isHome ? mHomeTeam.getSelfLink() : mAwayTeam.getSelfLink())) {
+                            result = new LeagueTableStanding(standing);
+                            if (result.getPosition() <= 4) {
+                                result.setBackgroundColor(getResources()
+                                        .getColor(R.color.light_green));
+                            } else {
+                                if (result.getPosition() > standing.length() - 3) {
+                                    result.setBackgroundColor(getResources()
+                                            .getColor(R.color.light_red));
+                                } else {
+                                    result.setBackgroundColor(getResources()
+                                            .getColor(getResources().getColor(Color.TRANSPARENT)));
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(LeagueTableStanding standing) {
+            mLeagueTableStanding = standing;
+            mFetchedLeagueTableStanding = true;
+            tryCallTeamDetailsActivity(isHome);
+        }
+    }
+
+    private class FetchTeamPlayersTask extends AsyncTask<Boolean, Void, List<Player>> {
+        private Boolean isHome;
+
+        @Override
+        protected List<Player> doInBackground(Boolean... params) {
+            isHome = params[0];
+            List<Player> results = new ArrayList<>();
+            try {
+                JSONArray players = WebServiceUtils.getJSONObjectFromUrl(
+                        (isHome ? mHomeTeam.getSelfLink() : mAwayTeam.getSelfLink())
+                                + WebServiceURLs.INCOMPLETE_GET_TEAM_PLAYERS)
+                        .getJSONArray(JsonKeys.JSON_PLAYERS);
+                JSONObject player;
+                for (int i = 0; i < players.length(); i++) {
+                    player = players.getJSONObject(i);
+                    results.add(new Player(player));
+                }
+            } catch (JSONException | NullPointerException | ParseException e) {
+                e.printStackTrace();
+            }
+            return results;
+        }
+
+        @Override
+        protected void onPostExecute(List<Player> players) {
+            mFetchedTeamPlayers = true;
+            if (isHome) {
+                mHomeTeam.setPlayers(players);
+            } else {
+                mAwayTeam.setPlayers(players);
+            }
+            tryCallTeamDetailsActivity(isHome);
+        }
+    }
+
+
 }

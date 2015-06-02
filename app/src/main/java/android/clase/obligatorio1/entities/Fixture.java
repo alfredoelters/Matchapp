@@ -62,6 +62,8 @@ public class Fixture implements Serializable {
             head2Head = new Head2Head(json.getJSONObject(JsonKeys.JSON_HEAD_TO_HEAD));
             selfLink = fixture.getJSONObject(JsonKeys.JSON_LINKS)
                     .getJSONObject(JsonKeys.JSON_SELF_LINK).getString(JsonKeys.JSON_HREF);
+            soccerSeasonLink = fixture.getJSONObject(JsonKeys.JSON_LINKS)
+                    .getJSONObject(JsonKeys.JSON_SOCCER_SEASON_LINK).getString(JsonKeys.JSON_HREF);
         }
     }
 

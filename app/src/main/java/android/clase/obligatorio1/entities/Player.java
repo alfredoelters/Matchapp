@@ -29,12 +29,16 @@ public class Player implements Serializable {
     public Player(JSONObject json) throws JSONException, ParseException {
         name = json.getString(JsonKeys.JSON_NAME);
         position = json.getString(JsonKeys.JSON_POSITION);
-        jerseyNumber = json.getInt(JsonKeys.JSON_JERSEY_NUMBER);
+        if (!json.get(JsonKeys.JSON_JERSEY_NUMBER).equals(JSONObject.NULL)) {
+            jerseyNumber = json.getInt(JsonKeys.JSON_JERSEY_NUMBER);
+        }
         nationality = json.getString(JsonKeys.JSON_NATIONALITY);
         marketValue = json.getString(JsonKeys.JSON_MARKET_VALUE);
         responseDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         dateOfBirth = responseDateFormat.parse(json.getString(JsonKeys.JSON_DATE_OF_BIRTH));
-        contractUntil = responseDateFormat.parse(json.getString(JsonKeys.JSON_CONTRACT_UNTIL));
+        if (!json.get(JsonKeys.JSON_CONTRACT_UNTIL).equals(JSONObject.NULL)) {
+            contractUntil = responseDateFormat.parse(json.getString(JsonKeys.JSON_CONTRACT_UNTIL));
+        }
     }
 
     public String getName() {

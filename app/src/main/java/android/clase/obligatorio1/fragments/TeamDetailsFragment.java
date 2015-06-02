@@ -27,6 +27,12 @@ import java.util.List;
  */
 public class TeamDetailsFragment extends Fragment {
 
+    /**
+     * Extra keys to send data to the TeamDetailsActivity
+     */
+    public static final String EXTRA_LEAGUE_STANDING = "leagueTableStanding";
+    public static final String EXTRA_TEAM = "team";
+
     //UI Components
     private Toolbar mToolbar;
     private TextView mMarketValueTextView;
@@ -49,8 +55,8 @@ public class TeamDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Intent intent = getActivity().getIntent();
         mLeagueTableStanding = (LeagueTableStanding) intent
-                .getSerializableExtra(LeagueTableFragment.EXTRA_LEAGUE_STANDING);
-        mTeam = (Team) intent.getSerializableExtra(LeagueTableFragment.EXTRA_TEAM);
+                .getSerializableExtra(EXTRA_LEAGUE_STANDING);
+        mTeam = (Team) intent.getSerializableExtra(EXTRA_TEAM);
     }
 
     @Nullable
@@ -119,7 +125,7 @@ public class TeamDetailsFragment extends Fragment {
             TextView playerName = (TextView) convertView.findViewById(R.id.playerNameTextView);
             TextView playerPosition = (TextView) convertView.findViewById(R.id.playerPositionTextView);
             TextView playerNationality = (TextView) convertView.findViewById(R.id.playerNationalityTextView);
-            playerNumber.setText(player.getJerseyNumber().toString());
+            playerNumber.setText(player.getJerseyNumber()!=null? player.getJerseyNumber().toString():"-");
             playerName.setText(player.getName());
             playerPosition.setText(player.getPosition());
             playerNationality.setText(player.getNationality());

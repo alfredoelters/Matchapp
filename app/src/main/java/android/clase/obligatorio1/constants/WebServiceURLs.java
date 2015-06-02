@@ -48,4 +48,6 @@ public class WebServiceURLs {
 
     //E.g. = GET http://api.football-data.org/alpha/soccerseasons/357/leagueTable
     public static final String GET_LEAGUE_TABLE_BY_ID = WEB_SERVICE_ENDPOINT + "soccerseasons/%d/leagueTable";
+    public static final String INCOMPLETE_GETE_LEAGUETABLE = "/leagueTable";
+
 }

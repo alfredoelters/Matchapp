@@ -31,6 +31,7 @@
     <string name="score_separator">-</string>
     <string name="action_share">Share</string>
     <string name="share_message">Shared with MatchApp: </string>
+    <string name="gettingTeam">Getting team info...</string>
 
     <!--Fixture Details Screen Dummy Strings-->
     <string name="dummy_league_name">League Name</string>
