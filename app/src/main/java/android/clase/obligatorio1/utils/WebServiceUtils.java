@@ -187,7 +187,7 @@ public class WebServiceUtils {
                 InputStream stream = connection.getInputStream();
                 // we will save the image on storage, as a jpg file
                 FileOutputStream outputStream = context.openFileOutput(auxiliaryFileName, Context.MODE_PRIVATE);
-                byte[] bytes = new byte[1024];
+                byte[] bytes = new byte[4096];
                 int currentSize;
                 while ((currentSize = stream.read(bytes)) != -1) {
                     // read bytes until we have bytes to read from the stream

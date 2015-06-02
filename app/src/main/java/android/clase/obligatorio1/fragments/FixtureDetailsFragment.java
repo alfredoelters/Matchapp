@@ -135,16 +135,19 @@ public class FixtureDetailsFragment extends Fragment {
         try {
             SVG homeLogoSVG = SVGParser.getSVGFromInputStream(new FileInputStream(homeLogo));
             Drawable homeLogoDrawable = homeLogoSVG.createPictureDrawable();
-            mAwayTeamLogo.setImageDrawable(homeLogoDrawable != null ? homeLogoDrawable
+            mHomeTeamLogo.setImageDrawable(homeLogoDrawable != null ? homeLogoDrawable
                     : getResources().getDrawable(R.mipmap.ic_launcher));
         } catch (Exception e) {
-            mAwayTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+            mHomeTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         }
         Integer homeTeamScore = mFixture.getGoalsHomeTeam();
         //If match status isn't finished, the API returns -1 goals for both teams.
-        mHomeTeamScoreTextView.setText(homeTeamScore != -1 ? homeTeamScore.toString() : " - ");
+        if (homeTeamScore != -1) {
+            mHomeTeamScoreTextView.setText(homeTeamScore.toString());
+        } else {
+            mHomeTeamScoreTextView.setVisibility(View.INVISIBLE);
+        }
         mAwayTeamTextView.setText(mFixture.getAwayTeam().getName());
-        Integer awayTeamScore = mFixture.getGoalsAwayTeam();
         File awayLogo = getActivity().getFileStreamPath(HomeFragment.AWAY_CREST_FILE);
         try {
             SVG awayLogoSVG = SVGParser.getSVGFromInputStream(new FileInputStream(awayLogo));
@@ -154,8 +157,13 @@ public class FixtureDetailsFragment extends Fragment {
         } catch (Exception e) {
             mAwayTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         }
+        Integer awayTeamScore = mFixture.getGoalsAwayTeam();
         //If match status isn't finished, the API returns -1 goals for both teams.
-        mAwayTeamScoreTextView.setText(awayTeamScore != -1 ? awayTeamScore.toString() : " - ");
+        if (awayTeamScore != -1) {
+            mAwayTeamScoreTextView.setText(awayTeamScore.toString());
+        } else {
+            mAwayTeamScoreTextView.setVisibility(View.INVISIBLE);
+        }
         mHomeTeamNameH2H.setText(mFixture.getHomeTeam().getName());
         mAwayTeamNameH2H.setText(mFixture.getAwayTeam().getName());
         mHomeTeamWins.setText(mFixture.getHead2Head().getHomeTeamWins().toString());
