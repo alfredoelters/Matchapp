@@ -28,6 +28,7 @@ public class JsonKeys {
     public static final String JSON_GOALS_HOME_TEAM = "goalsHomeTeam";
     public static final String JSON_GOALS_AWAY_TEAM = "goalsAwayTeam";
     public static final String JSON_HEAD_TO_HEAD = "head2head";
+    public static final String JSON_STATUS = "status";
 
     public static final String JSON_FIXTURES = "fixtures";
     public static final String JSON_AWAY_WINS = "awayTeamWins";

@@ -29,6 +29,8 @@
     <string name="versus">VS</string>
     <string name="draws">Empates</string>
     <string name="score_separator">-</string>
+    <string name="action_share">Compartir</string>
+    <string name="share_message">Compartido con MatchApp: </string>
 
     <!--Fixture Details Screen Dummy Strings-->
     <string name="dummy_league_name">League Name</string>

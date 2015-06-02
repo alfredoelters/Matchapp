@@ -161,7 +161,7 @@ public class LeagueTableFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.league_table_menu, menu);
+        inflater.inflate(R.menu.menu_league_table, menu);
         MenuItem favoriteItem = menu.findItem(R.id.favoriteAction);
         if (mIsFavorite)
             favoriteItem.setIcon(R.drawable.abc_btn_rating_star_on_mtrl_alpha);

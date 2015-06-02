@@ -37,6 +37,7 @@ public class Fixture implements Serializable {
     private String soccerSeasonLink;
     private String homeTeamLink;
     private String awayTeamLink;
+    private String status;
 
     private Team homeTeam;
     private Team awayTeam;
@@ -52,6 +53,7 @@ public class Fixture implements Serializable {
             JSONObject fixture = json.getJSONObject(JsonKeys.JSON_FIXTURE);
             homeTeam.setName(fixture.getString(JsonKeys.JSON_HOME_TEAM_NAME));
             awayTeam.setName(fixture.getString(JsonKeys.JSON_AWAY_TEAM_NAME));
+            status = fixture.getString(JsonKeys.JSON_STATUS);
             date = responseDateFormat.parse(fixture.getString(JsonKeys.JSON_DATE));
             matchDay = fixture.getInt(JsonKeys.JSON_MATCH_DAY);
             JSONObject result = fixture.getJSONObject(JsonKeys.JSON_RESULT);
@@ -158,5 +160,13 @@ public class Fixture implements Serializable {
 
     public void setHead2Head(Head2Head head2Head) {
         this.head2Head = head2Head;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

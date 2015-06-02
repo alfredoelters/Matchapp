@@ -6,15 +6,16 @@ import android.clase.obligatorio1.entities.Fixture;
 import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.Team;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -28,7 +29,6 @@ import com.larvalabs.svgandroid.SVGParser;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -86,6 +86,7 @@ public class FixtureDetailsFragment extends Fragment {
         mHomeTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_HOME_TEAM);
         mAwayTeam = (Team) extras.getSerializable(HomeFragment.EXTRA_AWAY_TEAM);
         mLeagueName = extras.getString(HomeFragment.EXTRA_LEAGUE_NAME);
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -171,6 +172,40 @@ public class FixtureDetailsFragment extends Fragment {
         mDraws.setText(mFixture.getHead2Head().getDraws().toString());
         mHeadToHeadListView.setAdapter(new MatchAdapter(mFixture.getHead2Head().getFixtures()));
     }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_fixture_details, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                boolean matchFinished = mFixture.getStatus().equals("FINISHED");
+                StringBuilder textToSend = new StringBuilder(MATCH_DATE_FORMAT
+                        .format(mFixture.getDate())).append(" ")
+                        .append(MATCH_TIME_FORMAT.format(mFixture.getDate())).append(" \n")
+                        .append(mFixture.getHomeTeam().getName()).append(" ").append(matchFinished ?
+                                mFixture.getGoalsHomeTeam() : "").append(" - ").append(matchFinished ?
+                                mFixture.getGoalsAwayTeam():"").append(" ")
+                        .append(mFixture.getAwayTeam().getName())
+                        .append("\n").append(mFixture.getStatus())
+                        .append("\n").append(getString(R.string.share_message)).append(" ")
+                        .append("https://play.google.com/store/apps?hl=es");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, textToSend.toString());
+                sendIntent.setType("text/plain");
+                startActivity(sendIntent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
     @Override
     public void onDestroy() {
