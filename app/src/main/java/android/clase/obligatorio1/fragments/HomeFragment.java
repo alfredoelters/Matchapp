@@ -13,7 +13,6 @@ import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.SoccerSeason;
 import android.clase.obligatorio1.entities.Team;
 import android.clase.obligatorio1.utils.WebServiceUtils;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -70,6 +69,9 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     public static final String EXTRA_AWAY_TEAM = "awayTeam";
 
     public static final String EXTRA_LEAGUE_TABLE = "leagueTable";
+
+    //SavedInstance keys
+    public static final String KEY_SELECTED_LEAGUE_POSITION = "selectedLeaguePositon";
 
     //UI components
     private Spinner mLeaguesSpinner;
@@ -133,13 +135,19 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private Fixture mFetchedFixture;
     private Team mHomeTeam;
     private Team mAwayTeam;
-    private boolean mHomeTeamCrestFetched;
-    private boolean mAwayTeamCrestFetched;
+
+    /**
+     * Integer to preserve selected league in the spinner on rotation
+     */
+    private Integer mSelectedLeaguePosition;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            mSelectedLeaguePosition = savedInstanceState.getInt(KEY_SELECTED_LEAGUE_POSITION);
+        }
         mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mLeagues = new ArrayList<>();
         mMatches = new ArrayList<>();
@@ -275,7 +283,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     }
 
 
-
     public void selectFavoriteLeague() {
         String favoriteLeagueCaption = mPreferences.getString(PreferencesKeys.PREFS_FAVORITE_LEAGUE,
                 null);
@@ -289,6 +296,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         } else {
             mLeaguesSpinner.setSelection(0);
         }
+        getActivity().invalidateOptionsMenu();
     }
 
     /**
@@ -322,6 +330,11 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         if (mFetchAwayTeamTask != null && mFetchAwayTeamTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchAwayTeamTask.cancel(true);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt(KEY_SELECTED_LEAGUE_POSITION, mLeaguesSpinner.getSelectedItemPosition());
     }
 
     @Override
@@ -498,7 +511,13 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             mMatches.addAll(mAllMatches);
             mHomeListView.setAdapter(new MatchesAdapter(mMatches));
             //If there is a favorite league, set the selection as this one.
-            selectFavoriteLeague();
+            if(mSelectedLeaguePosition == null){
+                selectFavoriteLeague();
+            }else{
+                //In case of rotations preserve the selected league before it.
+                mLeaguesSpinner.setSelection(mSelectedLeaguePosition);
+                getActivity().invalidateOptionsMenu();
+            }
         }
     }
 
@@ -616,8 +635,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                     mFetchedFixture = null;
                     mHomeTeam = null;
                     mAwayTeam = null;
-                    mAwayTeamCrestFetched = false;
-                    mHomeTeamCrestFetched = false;
                     mFetchFixtureTask = new FetchFixtureTask(match);
                     mFetchFixtureTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     mFetchHomeTeamTask = new FetchTeamDetailsTask(true);
@@ -801,13 +818,13 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
             if (leagueTable != null) {
                 mProgressDialog.dismiss();
                 //Check if there's actually a leagueTable
-                if(leagueTable.getLeagueCaption() != null){
+                if (leagueTable.getLeagueCaption() != null) {
                     //When finished fetching leagueTable, start league table activity.
                     Intent callLeagueTableActivity = new Intent(getActivity(),
                             LeagueTableActivity.class);
                     callLeagueTableActivity.putExtra(EXTRA_LEAGUE_TABLE, leagueTable);
                     startActivity(callLeagueTableActivity);
-                }else{
+                } else {
                     //If there is no league, for example for the Champions League, we report an error.
                     mNoLeagueDialog.show();
                 }
