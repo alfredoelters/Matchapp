@@ -70,15 +70,10 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     //Extra keys
     public static final String EXTRA_MATCH = "match";
     public static final String EXTRA_LEAGUE_NAME = "leagueName";
-    public static final String EXTRA_HOME_TEAM_CREST = "homeTeamCrest";
-    public static final String EXTRA_AWAY_TEAM_CREST = "awayTeamCrest";
     public static final String EXTRA_HOME_TEAM = "homeTeam";
     public static final String EXTRA_AWAY_TEAM = "awayTeam";
 
     public static final String EXTRA_LEAGUE_TABLE = "leagueTable";
-
-    public static final String HOME_CREST_FILE = "home_crest.svg";
-    public static final String AWAY_CREST_FILE = "away_crest.svg";
 
     //UI components
     private Spinner mLeaguesSpinner;
@@ -131,9 +126,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private FetchFixtureTask mFetchFixtureTask;
 
     private FetchLeagueTableTask mFetchLeagueTableTask;
-
-    private DownloadCrestImageTask mHomeTeamCrestTask;
-    private DownloadCrestImageTask mAwayTeamCrestTask;
 
     private FetchTeamDetailsTask mFetchHomeTeamTask;
     private FetchTeamDetailsTask mFetchAwayTeamTask;
@@ -339,12 +331,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         if (mFetchLeagueTableTask != null && mFetchLeagueTableTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchLeagueTableTask.cancel(true);
         }
-        if (mHomeTeamCrestTask != null && mHomeTeamCrestTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mHomeTeamCrestTask.cancel(true);
-        }
-        if (mAwayTeamCrestTask != null && mAwayTeamCrestTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mAwayTeamCrestTask.cancel(true);
-        }
         if (mFetchHomeTeamTask != null && mFetchHomeTeamTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchHomeTeamTask.cancel(true);
         }
@@ -453,8 +439,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
      * Method to call FixtureDetailsActivity in case all required data has been fetched
      */
     public void tryCallFixtureDetailsActivity() {
-        if (mFetchedFixture != null && mHomeTeamCrestFetched && mAwayTeamCrestFetched
-                && mHomeTeam != null && mAwayTeam != null) {
+        if (mFetchedFixture != null && mHomeTeam != null && mAwayTeam != null) {
             mProgressDialog.dismiss();
             //When finished fetching fixture info, start fixture detail activity.
             Intent callFixtureDetailsActivity = new Intent(getActivity(),
@@ -858,51 +843,13 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         @Override
         protected void onPostExecute(Void aVoid) {
             if (mIsHomeTeam && mHomeTeam != null) {
-                mHomeTeamCrestTask = new DownloadCrestImageTask(getActivity(), true);
-                mHomeTeamCrestTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                tryCallFixtureDetailsActivity();
             } else {
                 if (!mIsHomeTeam && mAwayTeam != null) {
-                    mAwayTeamCrestTask = new DownloadCrestImageTask(getActivity(), false);
-                    mAwayTeamCrestTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    tryCallFixtureDetailsActivity();
                 } else {
                     errorOccurredInAsyncTasks();
                 }
-            }
-        }
-    }
-
-    /**
-     * AsyncTask that downloads an image for the given URL, and sets the Bitmap in the UI thread
-     */
-    public class DownloadCrestImageTask extends AsyncTask<String, Void, Boolean> {
-        private Context mContext;
-        private boolean mIsHomeTeam;
-
-        public DownloadCrestImageTask(Context context, boolean home) {
-            mContext = context;
-            mIsHomeTeam = home;
-        }
-
-        @Override
-        protected Boolean doInBackground(String... strings) {
-            return WebServiceUtils.downloadSVGFromUrl(
-                    mIsHomeTeam ? mHomeTeam.getCrestURL() : mAwayTeam.getCrestURL(),
-                    mContext,
-                    mIsHomeTeam ? HOME_CREST_FILE : AWAY_CREST_FILE);
-        }
-
-        @Override
-        public void onPostExecute(Boolean fetched) {
-            // show downloaded bitmap in the imageView
-            if (fetched) {
-                if (mIsHomeTeam) {
-                    mHomeTeamCrestFetched = true;
-                } else {
-                    mAwayTeamCrestFetched = true;
-                }
-                tryCallFixtureDetailsActivity();
-            } else {
-                errorOccurredInAsyncTasks();
             }
         }
     }

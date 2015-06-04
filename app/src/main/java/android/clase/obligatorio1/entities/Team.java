@@ -2,8 +2,7 @@ package android.clase.obligatorio1.entities;
 
 import android.clase.obligatorio1.constants.JsonKeys;
 import android.graphics.Bitmap;
-
-import com.larvalabs.svgandroid.SVG;
+import android.os.Parcelable;
 
 import org.json.JSONException;
 import org.json.JSONObject;

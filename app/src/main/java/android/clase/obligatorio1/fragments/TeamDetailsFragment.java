@@ -6,6 +6,7 @@ import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -32,6 +33,7 @@ public class TeamDetailsFragment extends Fragment {
      */
     public static final String EXTRA_LEAGUE_STANDING = "leagueTableStanding";
     public static final String EXTRA_TEAM = "team";
+    public static final String EXTRA_TEAM_LOGO_BITMAP = "teamLogo";
 
     //UI Components
     private Toolbar mToolbar;
@@ -44,6 +46,7 @@ public class TeamDetailsFragment extends Fragment {
      * Current team to show
      */
     private Team mTeam;
+    private Bitmap mTeamLogoBitmap;
 
     /**
      * Current's team standing in the league
@@ -57,6 +60,7 @@ public class TeamDetailsFragment extends Fragment {
         mLeagueTableStanding = (LeagueTableStanding) intent
                 .getSerializableExtra(EXTRA_LEAGUE_STANDING);
         mTeam = (Team) intent.getSerializableExtra(EXTRA_TEAM);
+        mTeamLogoBitmap = intent.getParcelableExtra(EXTRA_TEAM_LOGO_BITMAP);
     }
 
     @Nullable
@@ -67,12 +71,15 @@ public class TeamDetailsFragment extends Fragment {
         mToolbar.setTitle(mTeam.getName());
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
         View playersViewHeader = inflater.inflate(R.layout.team_details_fragment_header,
                 mPlayersListView, false);
-
         teamCrestImageView = (ImageView) playersViewHeader.findViewById(R.id.teamCrestImageView);
+        if (mTeamLogoBitmap != null) {
+            teamCrestImageView.setImageBitmap(mTeamLogoBitmap);
+        } else {
+            teamCrestImageView.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+        }
         mMarketValueTextView = (TextView) playersViewHeader.findViewById(R.id.marketValueTextView);
         String marketValue = mTeam.getSquadMarketValue();
         if (marketValue == null || marketValue.equals("null")) {

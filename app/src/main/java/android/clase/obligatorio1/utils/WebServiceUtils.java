@@ -209,8 +209,7 @@ public class WebServiceUtils {
         return res;
     }
 
-    public static Drawable dummy(String url, Context context, String auxiliaryFileName) {
-        url = "http://upload.wikimedia.org/wikipedia/de/9/9e/AC_Mailand_Logo.svg";
+    public static Drawable downloadSVGFromUrlAndConvertToDrawable(String url, Context context, String auxiliaryFileName) {
         HttpURLConnection connection = null;
         Drawable drawable = null;
         try {
@@ -222,11 +221,6 @@ public class WebServiceUtils {
             e.printStackTrace();
         } finally {
             if (connection != null) connection.disconnect();
-        }
-
-        // si no tengo drawable disponible cargo un placeholder (por ej. el icono de la app)
-        if (drawable == null) {
-            drawable = context.getResources().getDrawable(R.mipmap.ic_launcher);
         }
         return drawable;
     }

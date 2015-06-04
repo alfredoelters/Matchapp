@@ -12,13 +12,19 @@ import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
 import android.clase.obligatorio1.utils.WebServiceUtils;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -33,15 +39,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.larvalabs.svgandroid.SVG;
-import com.larvalabs.svgandroid.SVGParser;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,6 +56,12 @@ import java.util.List;
 public class FixtureDetailsFragment extends Fragment {
     private static final DateFormat MATCH_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     private static final DateFormat MATCH_TIME_FORMAT = new SimpleDateFormat("hh:mm a");
+
+    public static final String HOME_CREST_FILE = "home_crest.svg";
+    public static final String AWAY_CREST_FILE = "away_crest.svg";
+
+    private DownloadCrestImageTask mFetchHomeTeamCrest;
+    private DownloadCrestImageTask mFetchAwayTeamCrest;
 
     //UI components
     private TextView mMatchDayTextView;
@@ -72,7 +79,6 @@ public class FixtureDetailsFragment extends Fragment {
     private TextView mDraws;
     private Toolbar mToolbar;
     private ListView mHeadToHeadListView;
-    private LinearLayout mMatchDetailsLinearLayout;
     private ImageView mHomeTeamLogo;
     private ImageView mAwayTeamLogo;
     private ProgressDialog mProgressDialog;
@@ -99,6 +105,8 @@ public class FixtureDetailsFragment extends Fragment {
 
     private Team mHomeTeam;
     private Team mAwayTeam;
+    private Bitmap mHomeTeamLogoBitmap;
+    private Bitmap mAwayTeamLogoBitmap;
 
 //    private FetchFixtureTask mFetchFixtureTask;
 
@@ -114,6 +122,10 @@ public class FixtureDetailsFragment extends Fragment {
             mLeagueName = extras.getString(HomeFragment.EXTRA_LEAGUE_NAME);
         }
         setHasOptionsMenu(true);
+        mFetchHomeTeamCrest = new DownloadCrestImageTask(getActivity(), true);
+        mFetchHomeTeamCrest.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        mFetchAwayTeamCrest = new DownloadCrestImageTask(getActivity(), false);
+        mFetchAwayTeamCrest.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Nullable
@@ -121,22 +133,24 @@ public class FixtureDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_fixutre_details, container, false);
         //To add a header to a ListView, you must create a separated layout and inflate it too.
-        View headToHeadListViewHeader = inflater.inflate(R.layout.fragment_fixture_details_header, mHeadToHeadListView, false);
+        final View headToHeadListViewHeader = inflater.inflate(R.layout.fragment_fixture_details_header, mHeadToHeadListView, false);
         mMatchDayTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchDayTextView);
         mMatchDateTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchDateTextView);
         mMatchStatusTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchStatusTextView);
         mMatchStartTimeTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.matchStartTimeTextView);
         mHomeTeamLogo = (ImageView) headToHeadListViewHeader.findViewById(R.id.homeTeamImageView);
         mHomeTeamLogo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        mHomeTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+        mHomeTeamLogo.setClickable(false);
         mHomeTeamLogo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mFetchedLeagueTableStanding = false;
                 mFetchedTeamPlayers = false;
-                mFetchLeagueTableStandingTask = new FetchLeagueTableStandingTask();
+                mFetchLeagueTableStandingTask = new FetchLeagueTableStandingTask(headToHeadListViewHeader);
                 mFetchLeagueTableStandingTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, true);
-                mFetchPlayersTask = new FetchTeamPlayersTask();
-                mFetchPlayersTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,true);
+                mFetchPlayersTask = new FetchTeamPlayersTask(headToHeadListViewHeader);
+                mFetchPlayersTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, true);
 
             }
         });
@@ -145,16 +159,17 @@ public class FixtureDetailsFragment extends Fragment {
         mAwayTeamTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.awayTeamTextView);
         mAwayTeamLogo = (ImageView) headToHeadListViewHeader.findViewById(R.id.awayTeamImageView);
         mAwayTeamLogo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-
+        mAwayTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+        mAwayTeamLogo.setClickable(false);
         mAwayTeamLogo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mFetchedLeagueTableStanding = false;
                 mFetchedTeamPlayers = false;
-                mFetchLeagueTableStandingTask = new FetchLeagueTableStandingTask();
+                mFetchLeagueTableStandingTask = new FetchLeagueTableStandingTask(headToHeadListViewHeader);
                 mFetchLeagueTableStandingTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, false);
-                mFetchPlayersTask = new FetchTeamPlayersTask();
-                mFetchPlayersTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,false);
+                mFetchPlayersTask = new FetchTeamPlayersTask(headToHeadListViewHeader);
+                mFetchPlayersTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, false);
             }
         });
         mAwayTeamScoreTextView = (TextView) headToHeadListViewHeader.findViewById(R.id.awayTeamScoreTextView);
@@ -184,15 +199,15 @@ public class FixtureDetailsFragment extends Fragment {
         mMatchStatusTextView.setText(mFixture.getStatus());
         mMatchStartTimeTextView.setText(getString(R.string.startTime) + MATCH_TIME_FORMAT.format(matchDate));
         mHomeTeamTextView.setText(mFixture.getHomeTeam().getName());
-        File homeLogo = getActivity().getFileStreamPath(HomeFragment.HOME_CREST_FILE);
-        try {
-            SVG homeLogoSVG = SVGParser.getSVGFromInputStream(new FileInputStream(homeLogo));
-            Drawable homeLogoDrawable = homeLogoSVG.createPictureDrawable();
-            mHomeTeamLogo.setImageDrawable(homeLogoDrawable != null ? homeLogoDrawable
-                    : getResources().getDrawable(R.mipmap.ic_launcher));
-        } catch (Exception e) {
-            mHomeTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
-        }
+//        File homeLogo = getActivity().getFileStreamPath(HOME_CREST_FILE);
+//        try {
+//            SVG homeLogoSVG = SVGParser.getSVGFromInputStream(new FileInputStream(homeLogo));
+//            Drawable homeLogoDrawable = homeLogoSVG.createPictureDrawable();
+//            mHomeTeamLogo.setImageDrawable(homeLogoDrawable != null ? homeLogoDrawable
+//                    : getResources().getDrawable(R.mipmap.ic_launcher));
+//        } catch (Exception e) {
+//            mHomeTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+//        }
         Integer homeTeamScore = mFixture.getGoalsHomeTeam();
         //If match status isn't finished, the API returns -1 goals for both teams.
         if (homeTeamScore != -1) {
@@ -201,15 +216,6 @@ public class FixtureDetailsFragment extends Fragment {
             mHomeTeamScoreTextView.setVisibility(View.INVISIBLE);
         }
         mAwayTeamTextView.setText(mFixture.getAwayTeam().getName());
-        File awayLogo = getActivity().getFileStreamPath(HomeFragment.AWAY_CREST_FILE);
-        try {
-            SVG awayLogoSVG = SVGParser.getSVGFromInputStream(new FileInputStream(awayLogo));
-            Drawable awayLogoDrawable = awayLogoSVG.createPictureDrawable();
-            mAwayTeamLogo.setImageDrawable(awayLogoDrawable != null ? awayLogoDrawable
-                    : getResources().getDrawable(R.mipmap.ic_launcher));
-        } catch (Exception e) {
-            mAwayTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
-        }
         Integer awayTeamScore = mFixture.getGoalsAwayTeam();
         //If match status isn't finished, the API returns -1 goals for both teams.
         if (awayTeamScore != -1) {
@@ -272,7 +278,7 @@ public class FixtureDetailsFragment extends Fragment {
         }
     }
 
-    private void tryCallTeamDetailsActivity(boolean isHome) {
+    private void tryCallTeamDetailsActivity(View view, boolean isHome) {
         if (mFetchedLeagueTableStanding && mFetchedTeamPlayers) {
             mProgressDialog.dismiss();
             Intent callTeamDetailsActivity = new Intent(getActivity(),
@@ -280,7 +286,15 @@ public class FixtureDetailsFragment extends Fragment {
             callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
             callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_TEAM, isHome ?
                     mHomeTeam : mAwayTeam);
+            callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_TEAM_LOGO_BITMAP, isHome ?
+                    mHomeTeamLogoBitmap : mAwayTeamLogoBitmap);
             startActivity(callTeamDetailsActivity);
+//            String transitionName = getString(R.string.team_logo_transition);
+//            Pair<View, String> pair = Pair.create(isHome ? view.findViewById(R.id.homeTeamImageView)
+//                    : view.findViewById(R.id.awayTeamImageView), transitionName);
+//            ActivityOptionsCompat options =
+//                    ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), pair);
+//            ActivityCompat.startActivity(getActivity(), callTeamDetailsActivity, options.toBundle());
         }
     }
 
@@ -315,6 +329,11 @@ public class FixtureDetailsFragment extends Fragment {
 
     private class FetchLeagueTableStandingTask extends AsyncTask<Boolean, Void, LeagueTableStanding> {
         private Boolean isHome;
+        private View mView;
+
+        public FetchLeagueTableStandingTask(View view) {
+            mView = view;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -343,12 +362,11 @@ public class FixtureDetailsFragment extends Fragment {
                                 result.setBackgroundColor(getResources()
                                         .getColor(R.color.light_green));
                             } else {
-                                if (result.getPosition() > standing.length() - 3) {
+                                if (result.getPosition() > standingsJson.length() - 3) {
                                     result.setBackgroundColor(getResources()
                                             .getColor(R.color.light_red));
                                 } else {
-                                    result.setBackgroundColor(getResources()
-                                            .getColor(getResources().getColor(Color.TRANSPARENT)));
+                                    result.setBackgroundColor(Color.TRANSPARENT);
                                 }
                             }
                             break;
@@ -365,12 +383,17 @@ public class FixtureDetailsFragment extends Fragment {
         protected void onPostExecute(LeagueTableStanding standing) {
             mLeagueTableStanding = standing;
             mFetchedLeagueTableStanding = true;
-            tryCallTeamDetailsActivity(isHome);
+            tryCallTeamDetailsActivity(mView, isHome);
         }
     }
 
     private class FetchTeamPlayersTask extends AsyncTask<Boolean, Void, List<Player>> {
         private Boolean isHome;
+        private View mView;
+
+        public FetchTeamPlayersTask(View view) {
+            mView = view;
+        }
 
         @Override
         protected List<Player> doInBackground(Boolean... params) {
@@ -400,8 +423,66 @@ public class FixtureDetailsFragment extends Fragment {
             } else {
                 mAwayTeam.setPlayers(players);
             }
-            tryCallTeamDetailsActivity(isHome);
+            tryCallTeamDetailsActivity(mView, isHome);
         }
+    }
+
+    /**
+     * AsyncTask that downloads an image for the given URL, and sets the Bitmap in the UI thread
+     */
+    public class DownloadCrestImageTask extends AsyncTask<String, Void, Drawable> {
+        private Context mContext;
+        private boolean mIsHomeTeam;
+
+        public DownloadCrestImageTask(Context context, boolean home) {
+            mContext = context;
+            mIsHomeTeam = home;
+        }
+
+        @Override
+        protected Drawable doInBackground(String... strings) {
+            return WebServiceUtils.downloadSVGFromUrlAndConvertToDrawable(
+                    mIsHomeTeam ? mHomeTeam.getCrestURL() : mAwayTeam.getCrestURL(),
+                    mContext,
+                    mIsHomeTeam ? HOME_CREST_FILE : AWAY_CREST_FILE);
+        }
+
+        @Override
+        public void onPostExecute(Drawable drawable) {
+            // show downloaded bitmap in the imageView
+            if (drawable != null) {
+                Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                drawable.draw(canvas);
+                if (mIsHomeTeam) {
+                    mHomeTeamLogo.setImageDrawable(drawable);
+                    mHomeTeamLogoBitmap = scaleDownBitmap(bitmap, 100, getActivity());
+                    mHomeTeamLogo.setClickable(true);
+
+                } else {
+                    mAwayTeamLogo.setImageDrawable(drawable);
+                    mAwayTeamLogoBitmap = scaleDownBitmap(bitmap, 100, getActivity());
+                    mAwayTeamLogo.setClickable(true);
+                }
+            }
+        }
+    }
+
+
+    public static Bitmap scaleDownBitmap(Bitmap photo, int newHeight, Context context) {
+
+        final float densityMultiplier = context.getResources().getDisplayMetrics().density;
+
+        int h= (int) (newHeight*densityMultiplier);
+        int w= (int) (h * photo.getWidth()/((double) photo.getHeight()));
+        if (w > h) {
+            w = h;
+        }
+
+        photo=Bitmap.createScaledBitmap(photo, w, h, true);
+
+        return photo;
     }
 
 

@@ -67,6 +67,7 @@
     <string name="playerPosition">Position</string>
     <string name="nationality">Nationality</string>
 
-
+    <!--Transitions-->
+    <string name="team_logo_transition">Team Logo Transition</string>
 
 </resources>
