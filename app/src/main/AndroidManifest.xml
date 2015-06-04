@@ -25,7 +25,6 @@
         </activity>
 
         <activity
-            android:parentActivityName=".activities.HomeActivity"
             android:name=".activities.TeamDetailsActivity"/>
         <activity
             android:parentActivityName=".activities.HomeActivity"
