@@ -17,10 +17,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -87,6 +83,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private Toolbar mToolbar;
     private ProgressDialog mProgressDialog;
     private AlertDialog mAlertDialog;
+    private AlertDialog mNoLeagueDialog;
 
     /**
      * int to specify the translation of the toolbar based on the scrolling
@@ -116,10 +113,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
      */
     private HashMap<String, String> mLeagueCaptions;
 
-    /**
-     * Variable to store the LoadMatchesTask in case it needs to be canceled
-     */
-//    private List<FetchMatchesTask> mFetchMatchesTasks;
 
     /**
      * Variable to store async tasks in case they needs to be canceled
@@ -160,7 +153,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         mMatches = new ArrayList<>();
         mAllMatches = new ArrayList<>();
         mLeagueCaptions = new HashMap<>();
-//        mFetchMatchesTasks = new ArrayList<>();
         mLoadLeaguesTask = new LoadLeaguesTask();
     }
 
@@ -224,6 +216,16 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                                 mAlertDialog.dismiss();
                             }
                         }).create();
+
+        mNoLeagueDialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.noTableTittle)
+                .setMessage(R.string.noTable)
+                .setIcon(android.R.drawable.ic_dialog_alert).setNeutralButton(R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mNoLeagueDialog.dismiss();
+                            }
+                        }).create();
         mAlertDialog.dismiss();
         return v;
     }
@@ -281,23 +283,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     }
 
 
-    //    public void updateMatchesFilter() {
-//        String query = mPreferences.getString(PreferencesKeys.PREFS_SEARCH_QUERY, null);
-//        if (query != null) {
-//            //Take into account both the league filter and the search filter
-//            int selectedLeaguePosition = mLeaguesSpinner.getSelectedItemPosition();
-//            for (Match match : mAllMatches) {
-//                if (selectedLeaguePosition == 0 || match.getLeagueCaption().
-//                        equals(((SoccerSeason) mLeaguesSpinner.getSelectedItem()).getCaption())) {
-//                    if (match.getHomeTeamName().contains(query) || match.getAwayTeamName().contains(query)) {
-//                        mMatches.add(match);
-//                    }
-//                }
-//            }
-//            ((MatchesAdapter) ((HeaderViewListAdapter) mHomeListView.getAdapter())
-//                    .getWrappedAdapter()).notifyDataSetChanged();
-//        }
-//    }
 
     public void selectFavoriteLeague() {
         String favoriteLeagueCaption = mPreferences.getString(PreferencesKeys.PREFS_FAVORITE_LEAGUE,
@@ -358,11 +343,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         super.onDestroy();
         //Finish all running async tasks
         cancelAllAsyncTasks();
-//        for (FetchMatchesTask task : mFetchMatchesTasks) {
-//            if (task != null && task.getStatus() != AsyncTask.Status.FINISHED) {
-//                task.cancel(true);
-//            }
-//        }
     }
 
 
@@ -436,18 +416,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                     .translationY(-toolbarHeight).setDuration(200).start();
         }
     }
-//
-//    private void startFetchMatchesTasks() {
-//        FetchMatchesTask task;
-//        SoccerSeason league;
-//        for (int i = 1; i < mLeagues.size(); i++) {
-//            task = new FetchMatchesTask();
-//            league =mLeagues.get(i);
-//            mFetchMatchesTasks.add(task);
-//            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-//                   league.getSelfLink(),league.getCaption());
-//        }
-//    }
 
     /**
      * Method to call FixtureDetailsActivity in case all required data has been fetched
@@ -473,7 +441,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private class LoadLeaguesTask extends AsyncTask<Void, Void, List<SoccerSeason>> {
         @Override
         protected List<SoccerSeason> doInBackground(Void... params) {
-            String leaguesJson = mPreferences.getString(PreferencesKeys.PREFS_LEAGUES, null);
+            String leaguesJson = getActivity().getIntent()
+                    .getStringExtra(SplashScreenFragment.EXTRA_LEAGUES);
             List<SoccerSeason> result = new ArrayList<>();
             if (leaguesJson != null) {
                 try {
@@ -508,55 +477,6 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         }
     }
 
-//    /**
-//     * Async task to load matches fetches by the splash screen into memory
-//     */
-//    private class FetchMatchesTask extends AsyncTask<String, Void, List<Match>> {
-//        private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//        @Override
-//        protected List<Match> doInBackground(String... params) {
-//            String soccerSeasonLink = params[0];
-//            String soccerSeasonCaption = params[1];
-//            //Fixed date for debug purposes
-//            Calendar calendar = Calendar.getInstance();
-//            calendar.set(Calendar.DAY_OF_MONTH, 17);
-//            calendar.set(Calendar.MONTH, 4);
-//            calendar.set(Calendar.YEAR, 2015);
-//            String dateFormatted = dateFormat.format(calendar.getTime());
-//            String matchesJson = WebServiceUtils.getJSONStringFromUrl(soccerSeasonLink
-//                    + String.format(WebServiceURLs.INCOMPLETE_GET_FIXTURES_OF_DATE_FOR_LEAGUE,
-//                    dateFormatted, dateFormatted));
-//            List<Match> result = new ArrayList<>();
-//            if (matchesJson != null) {
-//                try {
-//                    JSONArray matches = new JSONObject(matchesJson)
-//                            .getJSONArray(JsonKeys.JSON_FIXTURES);
-//                    JSONObject matchJson;
-//                    Match match;
-//                    for (int i = 0; i < matches.length(); i++) {
-//                        matchJson = matches.getJSONObject(i);
-//                        match = new Match(matchJson);
-//                        //Set the league caption to show in the header if necessary
-//                        match.setLeagueCaption(soccerSeasonCaption);
-//                        result.add(match);
-//                    }
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                } catch (ParseException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            return result;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(List<Match> matches) {
-//            super.onPostExecute(matches);
-//            mMatches.addAll(matches);
-//            ((MatchesAdapter) ((HeaderViewListAdapter) mHomeListView.getAdapter())
-//                    .getWrappedAdapter()).notifyDataSetChanged();
-//        }
-//    }
 
     /**
      * Async task to load matches fetches by the splash screen into memory
@@ -564,7 +484,8 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
     private class LoadMatchesTask extends AsyncTask<Void, Void, List<Match>> {
         @Override
         protected List<Match> doInBackground(Void... params) {
-            String matchesJson = mPreferences.getString(PreferencesKeys.PREFS_HOME_MATCHES, null);
+            String matchesJson = getActivity().getIntent()
+                    .getStringExtra(SplashScreenFragment.EXTRA_MATCHES);
             List<Match> result = new ArrayList<>();
             if (matchesJson != null) {
                 try {
@@ -932,11 +853,17 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
         protected void onPostExecute(LeagueTable leagueTable) {
             if (leagueTable != null) {
                 mProgressDialog.dismiss();
-                //When finished fetching leagueTable, start league table activity.
-                Intent callLeagueTableActivity = new Intent(getActivity(),
-                        LeagueTableActivity.class);
-                callLeagueTableActivity.putExtra(EXTRA_LEAGUE_TABLE, leagueTable);
-                startActivity(callLeagueTableActivity);
+                //Check if there's actually a leagueTable
+                if(leagueTable.getLeagueCaption() != null){
+                    //When finished fetching leagueTable, start league table activity.
+                    Intent callLeagueTableActivity = new Intent(getActivity(),
+                            LeagueTableActivity.class);
+                    callLeagueTableActivity.putExtra(EXTRA_LEAGUE_TABLE, leagueTable);
+                    startActivity(callLeagueTableActivity);
+                }else{
+                    //If there is no league, for example for the Champions League, we report an error.
+                    mNoLeagueDialog.show();
+                }
             } else {
                 errorOccurredInAsyncTasks();
             }

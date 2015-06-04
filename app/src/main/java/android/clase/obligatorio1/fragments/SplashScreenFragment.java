@@ -3,21 +3,22 @@ package android.clase.obligatorio1.fragments;
 import android.app.AlertDialog;
 import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.activities.HomeActivity;
-import android.clase.obligatorio1.constants.PreferencesKeys;
+import android.clase.obligatorio1.constants.WebServiceURLs;
+import android.clase.obligatorio1.database.MatchesDAO;
 import android.clase.obligatorio1.utils.SingleFragmentActivity;
-import android.clase.obligatorio1.utils.WebServiceInterface;
+import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,25 +32,18 @@ public class SplashScreenFragment extends Fragment {
      */
     private static final int CONNECTION_TIMEOUT = 5000;
 
+    public static final String EXTRA_MATCHES = "mMatches";
+    public static final String EXTRA_LEAGUES = "mLeagues";
+
+    private static final DateFormat RESPONSE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
     private Timer mConnectionTimeoutTimer;
 
-    private SharedPreferences mPreferences;
 
     /**
      * Dialog to alert the user that some GET request where unsuccessful
      */
     private AlertDialog mAlertDialog;
-
-
-    /**
-     * boolean to notify that the GET to fetch leagues was successful
-     */
-    private boolean mLoadedLeagues;
-
-    /**
-     * boolean to notify that the GET to fetch today's fixtures was successful
-     */
-    private boolean mLoadedMatches;
 
     /**
      * Task used to fetch leagues data
@@ -60,11 +54,21 @@ public class SplashScreenFragment extends Fragment {
      * Task used to fetch today's matches data
      */
     private FetchMatchesTask mFetchMatchesTask;
+
+    /**
+     * Matches fetched by the async task
+     */
+    private String mMatches;
+
+    /**
+     * Matches leagues by the async task
+     */
+    private String mLeagues;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ((SingleFragmentActivity) getActivity()).lockScreenOrientation();
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
     }
 
     @Override
@@ -122,9 +126,8 @@ public class SplashScreenFragment extends Fragment {
      * Method used to stop all running tasks
      */
     private void stopTasks() {
-//        mConnectionTimeoutTimer.cancel();
-        mLoadedMatches = false;
-        mLoadedLeagues = false;
+        mMatches = null;
+        mLeagues = null;
         if (mFetchMatchesTask != null && mFetchMatchesTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchMatchesTask.cancel(true);
         }
@@ -141,6 +144,8 @@ public class SplashScreenFragment extends Fragment {
         // Start the next activity
         Intent mainIntent = new Intent().setClass(
                 getActivity(), HomeActivity.class);
+        mainIntent.putExtra(EXTRA_MATCHES, mMatches);
+        mainIntent.putExtra(EXTRA_LEAGUES,mLeagues);
         startActivity(mainIntent);
 
         // Close the activity so the user won't able to go back this
@@ -179,15 +184,14 @@ public class SplashScreenFragment extends Fragment {
 
         @Override
         protected String doInBackground(Void... params) {
-            return WebServiceInterface.getInstance().getSoccerSeasonsJSON();
+            return WebServiceUtils.getJSONStringFromUrl(WebServiceURLs.GET_ALL_SOCCER_SEASONS);
         }
 
         @Override
         protected void onPostExecute(String leaguesJson) {
             if (leaguesJson != null) {
-                mLoadedLeagues = true;
-                mPreferences.edit().putString(PreferencesKeys.PREFS_LEAGUES, leaguesJson).commit();
-                if (mLoadedMatches)
+                mLeagues = leaguesJson;
+                if (mMatches != null)
                     startHomeActivity();
             } else {
                 alertLoadError();
@@ -204,19 +208,27 @@ public class SplashScreenFragment extends Fragment {
         protected String doInBackground(Void... params) {
             //Fixed date for debug purposes
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_MONTH,23);
-            calendar.set(Calendar.MONTH,4);
+            calendar.set(Calendar.DAY_OF_MONTH, 23);
+            calendar.set(Calendar.MONTH, 4);
             calendar.set(Calendar.YEAR, 2015);
-
-            return WebServiceInterface.getInstance().getFixturesJSONForDate(calendar.getTime(), null);
+            String dateString = RESPONSE_DATE_FORMAT.format(calendar.getTime());
+            String request = String.format(WebServiceURLs.GET_FIXTURES_OF_DATE_FOR_ALL_LEAGUES,
+                    dateString, dateString);
+            MatchesDAO dao = new MatchesDAO(getActivity());
+            String cachedJson = dao.getMatches(request);
+            if (cachedJson == null) {
+                cachedJson = WebServiceUtils.getJSONStringFromUrl(request);
+                if (cachedJson != null)
+                    dao.insertTodaysMatches(request, cachedJson);
+            }
+            return cachedJson;
         }
 
         @Override
         protected void onPostExecute(String fixturesJson) {
             if (fixturesJson != null) {
-                mLoadedMatches = true;
-                mPreferences.edit().putString(PreferencesKeys.PREFS_HOME_MATCHES, fixturesJson).commit();
-                if (mLoadedLeagues)
+                mMatches = fixturesJson;
+                if (mLeagues != null)
                     startHomeActivity();
             } else {
                 alertLoadError();

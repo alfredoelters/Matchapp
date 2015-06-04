@@ -19,6 +19,9 @@
     <string name="gettingLeagueTable">Getting league table info...</string>
     <string name="ok">OK</string>
 
+    <string name="noTableTittle"> No league table </string>
+    <string name="noTable">The selected soccer season does not have a league table</string>
+
     <!--Fixture Details Screen -->
     <string name="home">Home</string>
     <string name="away">Away</string>

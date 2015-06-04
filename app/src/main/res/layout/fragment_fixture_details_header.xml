@@ -73,7 +73,7 @@
                         android:id="@+id/matchStartTimeTextView"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:gravity="end"
                         android:text="@string/dummy_match_time"
                         android:textSize="14sp"/>
@@ -250,47 +250,41 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/head2head"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"/>
-
+                    style="@style/headerTextViewStyle"/>
             </LinearLayout>
 
             <TableLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin">
+                android:layout_height="wrap_content">
 
                 <TableRow
+                    android:background="@color/skyblue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="5dp">
+                    android:paddingBottom="5dp">
 
                     <TextView
                         android:id="@+id/home_team_name_h2h"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="center"
                         android:text="@string/dummy_home_team_name"
-                        android:textSize="14sp"/>
+                        style="@style/subTableHeaderTextViewStyle"/>
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
-                        android:gravity="center"
-                        android:text="@string/draws"
-                        android:textSize="14sp"/>
+                        style="@style/subTableHeaderTextViewStyle"
+                        android:text="@string/draws"/>
 
                     <TextView
                         android:id="@+id/away_team_name_h2h"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="@string/dummy_away_team_name"
-                        android:textSize="14sp"/>
+                        style="@style/subTableHeaderTextViewStyle"
+                        android:text="@string/dummy_away_team_name"/>
 
                 </TableRow>
 

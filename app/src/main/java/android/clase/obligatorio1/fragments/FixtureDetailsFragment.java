@@ -347,8 +347,7 @@ public class FixtureDetailsFragment extends Fragment {
                                     result.setBackgroundColor(getResources()
                                             .getColor(R.color.light_red));
                                 } else {
-                                    result.setBackgroundColor(getResources()
-                                            .getColor(getResources().getColor(Color.TRANSPARENT)));
+                                    result.setBackgroundColor(Color.TRANSPARENT);
                                 }
                             }
                             break;
