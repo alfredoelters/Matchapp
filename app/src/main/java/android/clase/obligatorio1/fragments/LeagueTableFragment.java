@@ -15,7 +15,10 @@ import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -218,6 +221,9 @@ public class LeagueTableFragment extends Fragment {
     private void cancelAllAsyncTasks(){
         if (mFetchTeamDetailsTask != null && mFetchTeamDetailsTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchTeamDetailsTask.cancel(true);
+        }
+        if (mFetchTeamPlayersTask != null && mFetchTeamPlayersTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mFetchTeamPlayersTask.cancel(true);
         }
     }
 

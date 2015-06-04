@@ -5,8 +5,12 @@ import android.clase.obligatorio1.R;
 import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
+import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,6 +25,8 @@ import android.widget.TextView;
 
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -39,7 +45,7 @@ public class TeamDetailsFragment extends Fragment {
     private Toolbar mToolbar;
     private TextView mMarketValueTextView;
     private ObservableListView mPlayersListView;
-    private ImageView teamCrestImageView;
+    private ImageView mTeamCrestImageView;
 
 
     /**
@@ -53,6 +59,8 @@ public class TeamDetailsFragment extends Fragment {
      */
     private LeagueTableStanding mLeagueTableStanding;
 
+    private DownloadCrestImageTask mDownloadCrestImageTask;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +68,12 @@ public class TeamDetailsFragment extends Fragment {
         mLeagueTableStanding = (LeagueTableStanding) intent
                 .getSerializableExtra(EXTRA_LEAGUE_STANDING);
         mTeam = (Team) intent.getSerializableExtra(EXTRA_TEAM);
-        mTeamLogoBitmap = intent.getParcelableExtra(EXTRA_TEAM_LOGO_BITMAP);
+        if (intent.getParcelableExtra(EXTRA_TEAM_LOGO_BITMAP) != null) {
+            mTeamLogoBitmap = intent.getParcelableExtra(EXTRA_TEAM_LOGO_BITMAP);
+        } else {
+            mDownloadCrestImageTask = new DownloadCrestImageTask();
+            mDownloadCrestImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     @Nullable
@@ -74,11 +87,11 @@ public class TeamDetailsFragment extends Fragment {
         mPlayersListView = (ObservableListView) v.findViewById(R.id.playersListView);
         View playersViewHeader = inflater.inflate(R.layout.team_details_fragment_header,
                 mPlayersListView, false);
-        teamCrestImageView = (ImageView) playersViewHeader.findViewById(R.id.teamCrestImageView);
+        mTeamCrestImageView = (ImageView) playersViewHeader.findViewById(R.id.teamCrestImageView);
         if (mTeamLogoBitmap != null) {
-            teamCrestImageView.setImageBitmap(mTeamLogoBitmap);
+            mTeamCrestImageView.setImageBitmap(mTeamLogoBitmap);
         } else {
-            teamCrestImageView.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+            mTeamCrestImageView.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         }
         mMarketValueTextView = (TextView) playersViewHeader.findViewById(R.id.marketValueTextView);
         String marketValue = mTeam.getSquadMarketValue();
@@ -137,6 +150,41 @@ public class TeamDetailsFragment extends Fragment {
             playerPosition.setText(player.getPosition());
             playerNationality.setText(player.getNationality());
             return convertView;
+        }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mDownloadCrestImageTask != null && mDownloadCrestImageTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mDownloadCrestImageTask.cancel(true);
+        }
+    }
+
+    /**
+     * AsyncTask that downloads an image for the given URL, and sets the Bitmap in the UI thread
+     */
+    public class DownloadCrestImageTask extends AsyncTask<String, Void, Drawable> {
+
+        @Override
+        protected Drawable doInBackground(String... strings) {
+            return WebServiceUtils.downloadSVGFromUrlAndConvertToDrawable(
+                    mTeam.getCrestURL(),
+                    getActivity(),
+                    mTeam.getName());
+        }
+
+        @Override
+        public void onPostExecute(Drawable drawable) {
+            // show downloaded bitmap in the imageView
+            if (drawable != null) {
+                Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                drawable.draw(canvas);
+                mTeamCrestImageView.setImageBitmap(bitmap);
+            }
         }
     }
 }
