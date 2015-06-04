@@ -17,6 +17,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -74,6 +75,8 @@ public class TeamDetailsFragment extends Fragment {
             mDownloadCrestImageTask = new DownloadCrestImageTask();
             mDownloadCrestImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
+        mTeamLogoBitmap = intent.getParcelableExtra(EXTRA_TEAM_LOGO_BITMAP);
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -127,6 +130,19 @@ public class TeamDetailsFragment extends Fragment {
         return v;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //Since this activity can have 2 different parents, we cant rely on the parentActivity
+        //attribute in the Manifest. In this case we just finish the current activity to show the
+        //activity that is on top of the back stack (the parent of this one)
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     private class PlayersAdapter extends ArrayAdapter<Player> {
 

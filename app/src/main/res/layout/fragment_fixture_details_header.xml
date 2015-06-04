@@ -145,7 +145,7 @@
                         android:id="@+id/homeTeamImageView"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:scaleType="fitCenter"/>
+                        android:scaleType="fitStart"/>
 
                 </RelativeLayout>
 
@@ -175,7 +175,7 @@
                         android:id="@+id/awayTeamImageView"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:scaleType="fitCenter"/>
+                        android:scaleType="fitStart"/>
 
                 </RelativeLayout>
 

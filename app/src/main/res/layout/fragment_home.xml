@@ -2,13 +2,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeActivity"
-    android:background="@color/white">
+    android:background="@color/white"
+    tools:context=".HomeActivity">
 
     <com.github.ksoichiro.android.observablescrollview.ObservableListView
         android:id="@+id/homeListView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/header"
@@ -18,14 +18,18 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
-            style="@style/toolbarStyle">
-        </android.support.v7.widget.Toolbar>
+            style="@style/toolbarStyle"></android.support.v7.widget.Toolbar>
 
-        <Spinner
-            android:id="@+id/leaguesSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/dark_skyblue" />
+        <RelativeLayout
+            android:background="@color/dark_skyblue"
+            android:layout_width="wrap_content"
+            android:layout_height="?attr/actionBarSize">
+
+            <Spinner
+                android:id="@+id/leaguesSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize" />
+        </RelativeLayout>
 
     </LinearLayout>
 
