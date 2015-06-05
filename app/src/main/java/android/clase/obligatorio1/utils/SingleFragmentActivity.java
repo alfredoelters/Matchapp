@@ -35,7 +35,7 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
         }
     }
 
-    public void lockScreenOrientation() {
+    public void lockScreenRotation() {
         int currentOrientation = getResources().getConfiguration().orientation;
         if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -44,7 +44,7 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
         }
     }
 
-    public void unlockScreenOrientation() {
+    public void unlockScreenRotation() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 

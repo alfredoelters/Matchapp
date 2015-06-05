@@ -68,21 +68,13 @@ public class SplashScreenFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((SingleFragmentActivity) getActivity()).lockScreenOrientation();
+        ((SingleFragmentActivity) getActivity()).lockScreenRotation();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-//        mConnectionTimeoutTimer = new Timer();
-//        mConnectionTimeoutTimer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                alertConnectionTimeout();
-//            }
-//
-//        }, CONNECTION_TIMEOUT);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         builder.setMessage(R.string.connectionTimeout)
@@ -208,7 +200,7 @@ public class SplashScreenFragment extends Fragment {
         protected String doInBackground(Void... params) {
             //Fixed date for debug purposes
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_MONTH, 23);
+            calendar.set(Calendar.DAY_OF_MONTH, 17);
             calendar.set(Calendar.MONTH, 4);
             calendar.set(Calendar.YEAR, 2015);
             String dateString = RESPONSE_DATE_FORMAT.format(calendar.getTime());

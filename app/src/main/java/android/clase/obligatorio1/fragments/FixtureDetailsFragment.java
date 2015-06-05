@@ -11,6 +11,8 @@ import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
+import android.clase.obligatorio1.utils.BitmapUtils;
+import android.clase.obligatorio1.utils.SingleFragmentActivity;
 import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.Context;
 import android.content.Intent;
@@ -21,12 +23,10 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.AndroidRuntimeException;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +35,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -145,6 +144,7 @@ public class FixtureDetailsFragment extends Fragment {
         mHomeTeamLogo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ((SingleFragmentActivity)getActivity()).lockScreenRotation();
                 mFetchedLeagueTableStanding = false;
                 mFetchedTeamPlayers = false;
                 mFetchLeagueTableStandingTask = new FetchLeagueTableStandingTask(headToHeadListViewHeader);
@@ -164,6 +164,7 @@ public class FixtureDetailsFragment extends Fragment {
         mAwayTeamLogo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ((SingleFragmentActivity)getActivity()).lockScreenRotation();
                 mFetchedLeagueTableStanding = false;
                 mFetchedTeamPlayers = false;
                 mFetchLeagueTableStandingTask = new FetchLeagueTableStandingTask(headToHeadListViewHeader);
@@ -199,15 +200,6 @@ public class FixtureDetailsFragment extends Fragment {
         mMatchStatusTextView.setText(mFixture.getStatus());
         mMatchStartTimeTextView.setText(getString(R.string.startTime) + MATCH_TIME_FORMAT.format(matchDate));
         mHomeTeamTextView.setText(mFixture.getHomeTeam().getName());
-//        File homeLogo = getActivity().getFileStreamPath(HOME_CREST_FILE);
-//        try {
-//            SVG homeLogoSVG = SVGParser.getSVGFromInputStream(new FileInputStream(homeLogo));
-//            Drawable homeLogoDrawable = homeLogoSVG.createPictureDrawable();
-//            mHomeTeamLogo.setImageDrawable(homeLogoDrawable != null ? homeLogoDrawable
-//                    : getResources().getDrawable(R.mipmap.ic_launcher));
-//        } catch (Exception e) {
-//            mHomeTeamLogo.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
-//        }
         Integer homeTeamScore = mFixture.getGoalsHomeTeam();
         //If match status isn't finished, the API returns -1 goals for both teams.
         if (homeTeamScore != -1) {
@@ -281,6 +273,7 @@ public class FixtureDetailsFragment extends Fragment {
     private void tryCallTeamDetailsActivity(View view, boolean isHome) {
         if (mFetchedLeagueTableStanding && mFetchedTeamPlayers) {
             mProgressDialog.dismiss();
+            ((SingleFragmentActivity)getActivity()).unlockScreenRotation();
             Intent callTeamDetailsActivity = new Intent(getActivity(),
                     TeamDetailsActivity.class);
             callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
@@ -289,12 +282,6 @@ public class FixtureDetailsFragment extends Fragment {
             callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_TEAM_LOGO_BITMAP, isHome ?
                     mHomeTeamLogoBitmap : mAwayTeamLogoBitmap);
             startActivity(callTeamDetailsActivity);
-//            String transitionName = getString(R.string.team_logo_transition);
-//            Pair<View, String> pair = Pair.create(isHome ? view.findViewById(R.id.homeTeamImageView)
-//                    : view.findViewById(R.id.awayTeamImageView), transitionName);
-//            ActivityOptionsCompat options =
-//                    ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), pair);
-//            ActivityCompat.startActivity(getActivity(), callTeamDetailsActivity, options.toBundle());
         }
     }
 
@@ -451,38 +438,28 @@ public class FixtureDetailsFragment extends Fragment {
         public void onPostExecute(Drawable drawable) {
             // show downloaded bitmap in the imageView
             if (drawable != null) {
-                Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-                drawable.draw(canvas);
+                Bitmap bitmap = null;
+                try {
+                    bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                    drawable.draw(canvas);
+                }catch (IllegalArgumentException e){
+                    //In case the bitmap exceeds 32 bits
+                    e.printStackTrace();
+                }
                 if (mIsHomeTeam) {
                     mHomeTeamLogo.setImageDrawable(drawable);
-                    mHomeTeamLogoBitmap = scaleDownBitmap(bitmap, 100, getActivity());
+                    mHomeTeamLogoBitmap = BitmapUtils.scaleDownBitmap(bitmap, 100, getActivity());
                     mHomeTeamLogo.setClickable(true);
 
                 } else {
                     mAwayTeamLogo.setImageDrawable(drawable);
-                    mAwayTeamLogoBitmap = scaleDownBitmap(bitmap, 100, getActivity());
+                    mAwayTeamLogoBitmap = BitmapUtils.scaleDownBitmap(bitmap, 100, getActivity());
                     mAwayTeamLogo.setClickable(true);
                 }
             }
         }
-    }
-
-
-    public static Bitmap scaleDownBitmap(Bitmap photo, int newHeight, Context context) {
-
-        final float densityMultiplier = context.getResources().getDisplayMetrics().density;
-
-        int h= (int) (newHeight*densityMultiplier);
-        int w= (int) (h * photo.getWidth()/((double) photo.getHeight()));
-        if (w > h) {
-            w = h;
-        }
-
-        photo=Bitmap.createScaledBitmap(photo, w, h, true);
-
-        return photo;
     }
 
 

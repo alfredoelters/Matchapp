@@ -15,20 +15,14 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    public static final String CRESTS_TABLE = "crests";
-    public static final String COLUMN_CREST_LINK = "crest_link";
-    public static final String COLUMN_CREST_IMAGE = "crest_image";
+
 
     public static final String MATCHES_TABLE = "matches";
     public static final String COLUMN_MATCHES_LINK = "matches_link";
     public static final String COLUMN_MATCHES_JSON = "matches_json";
 
-    public static final String[] CRESTS_TABLE_COLUMNS = {COLUMN_CREST_LINK, COLUMN_CREST_IMAGE};
     public static final String[] MATCHES_TABLE_COLUMNS = {COLUMN_MATCHES_LINK, COLUMN_MATCHES_JSON};
 
-    private static final String CREATE_CRESTS_TABLE = "create table " + CRESTS_TABLE + "("
-            + COLUMN_CREST_LINK + " text primary key , "
-            + COLUMN_CREST_IMAGE + " blob not null);";
 
     private static final String CREATE_MATCHES_TABLE = "create table " + MATCHES_TABLE + "("
             + COLUMN_MATCHES_LINK + " text primary key ,"
@@ -36,13 +30,11 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_CRESTS_TABLE);
         db.execSQL(CREATE_MATCHES_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-        db.execSQL("drop table if exists " + CRESTS_TABLE);
         db.execSQL("drop table if exists " + MATCHES_TABLE);
         onCreate(db);
     }

@@ -1,13 +1,12 @@
 package android.clase.obligatorio1.utils;
 
-import android.clase.obligatorio1.R;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 
 import com.larvalabs.svgandroid.SVG;
-import com.larvalabs.svgandroid.SVGParser;
+import com.larvalabs.svgandroid.SVGBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -213,10 +212,10 @@ public class WebServiceUtils {
         HttpURLConnection connection = null;
         Drawable drawable = null;
         try {
-            connection = (HttpURLConnection) new URL(url).openConnection();
-            SVG svgLogo = SVGParser.getSVGFromInputStream(connection.getInputStream());
-            drawable = svgLogo.createPictureDrawable();
 
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            SVG svgLogo = new SVGBuilder().readFromInputStream(connection.getInputStream()).build();
+            drawable = svgLogo.getDrawable();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

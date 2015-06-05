@@ -60,8 +60,6 @@ public class TeamDetailsFragment extends Fragment {
      */
     private LeagueTableStanding mLeagueTableStanding;
 
-    private DownloadCrestImageTask mDownloadCrestImageTask;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,12 +67,6 @@ public class TeamDetailsFragment extends Fragment {
         mLeagueTableStanding = (LeagueTableStanding) intent
                 .getSerializableExtra(EXTRA_LEAGUE_STANDING);
         mTeam = (Team) intent.getSerializableExtra(EXTRA_TEAM);
-        if (intent.getParcelableExtra(EXTRA_TEAM_LOGO_BITMAP) != null) {
-            mTeamLogoBitmap = intent.getParcelableExtra(EXTRA_TEAM_LOGO_BITMAP);
-        } else {
-            mDownloadCrestImageTask = new DownloadCrestImageTask();
-            mDownloadCrestImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
         mTeamLogoBitmap = intent.getParcelableExtra(EXTRA_TEAM_LOGO_BITMAP);
         setHasOptionsMenu(true);
     }
@@ -169,38 +161,4 @@ public class TeamDetailsFragment extends Fragment {
         }
     }
 
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mDownloadCrestImageTask != null && mDownloadCrestImageTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mDownloadCrestImageTask.cancel(true);
-        }
-    }
-
-    /**
-     * AsyncTask that downloads an image for the given URL, and sets the Bitmap in the UI thread
-     */
-    public class DownloadCrestImageTask extends AsyncTask<String, Void, Drawable> {
-
-        @Override
-        protected Drawable doInBackground(String... strings) {
-            return WebServiceUtils.downloadSVGFromUrlAndConvertToDrawable(
-                    mTeam.getCrestURL(),
-                    getActivity(),
-                    mTeam.getName());
-        }
-
-        @Override
-        public void onPostExecute(Drawable drawable) {
-            // show downloaded bitmap in the imageView
-            if (drawable != null) {
-                Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-                drawable.draw(canvas);
-                mTeamCrestImageView.setImageBitmap(bitmap);
-            }
-        }
-    }
 }

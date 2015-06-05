@@ -12,6 +12,7 @@ import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.Match;
 import android.clase.obligatorio1.entities.SoccerSeason;
 import android.clase.obligatorio1.entities.Team;
+import android.clase.obligatorio1.utils.SingleFragmentActivity;
 import android.clase.obligatorio1.utils.WebServiceUtils;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -303,6 +304,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
      * Method to notify the user of errors when trying to fetch data from the WS
      */
     private void errorOccurredInAsyncTasks() {
+        ((SingleFragmentActivity)getActivity()).unlockScreenRotation();
         cancelAllAsyncTasks();
         mProgressDialog.dismiss();
         mAlertDialog.show();
@@ -421,6 +423,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
      */
     public void tryCallFixtureDetailsActivity() {
         if (mFetchedFixture != null && mHomeTeam != null && mAwayTeam != null) {
+            ((SingleFragmentActivity)getActivity()).unlockScreenRotation();
             mProgressDialog.dismiss();
             //When finished fetching fixture info, start fixture detail activity.
             Intent callFixtureDetailsActivity = new Intent(getActivity(),
@@ -632,6 +635,7 @@ public class HomeFragment extends Fragment implements ObservableScrollViewCallba
                 public void onClick(View v) {
                     //Set required information to null and start all async tasks necessary
                     // to fetch it
+                    ((SingleFragmentActivity)getActivity()).lockScreenRotation();
                     mFetchedFixture = null;
                     mHomeTeam = null;
                     mAwayTeam = null;

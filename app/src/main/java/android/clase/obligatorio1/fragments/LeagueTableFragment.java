@@ -11,7 +11,10 @@ import android.clase.obligatorio1.entities.LeagueTable;
 import android.clase.obligatorio1.entities.LeagueTableStanding;
 import android.clase.obligatorio1.entities.Player;
 import android.clase.obligatorio1.entities.Team;
+import android.clase.obligatorio1.utils.BitmapUtils;
+import android.clase.obligatorio1.utils.SingleFragmentActivity;
 import android.clase.obligatorio1.utils.WebServiceUtils;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -91,6 +94,13 @@ public class LeagueTableFragment extends Fragment {
     private FetchTeamPlayersTask mFetchTeamPlayersTask;
 
     /**
+     * AsyncTask to download the team crest
+     */
+    private DownloadCrestImageTask mDownloadCrestImageTask;
+
+    private Bitmap mTeamLogoBitmap;
+
+    /**
      * Auxiliary list to store the team fetch by the FetchTeamDetailsTask
      */
     private Team mTeam;
@@ -158,7 +168,6 @@ public class LeagueTableFragment extends Fragment {
         return v;
     }
 
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_league_table, menu);
@@ -218,7 +227,7 @@ public class LeagueTableFragment extends Fragment {
     /**
      * Method to cancel all running asyncTasks
      */
-    private void cancelAllAsyncTasks(){
+    private void cancelAllAsyncTasks() {
         if (mFetchTeamDetailsTask != null && mFetchTeamDetailsTask.getStatus() != AsyncTask.Status.FINISHED) {
             mFetchTeamDetailsTask.cancel(true);
         }
@@ -231,6 +240,28 @@ public class LeagueTableFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         cancelAllAsyncTasks();
+    }
+
+    /**
+     * Method to notify the user of errors when trying to fetch data from the WS
+     */
+    private void errorOccurredInAsyncTasks() {
+        cancelAllAsyncTasks();
+        ((SingleFragmentActivity) getActivity()).unlockScreenRotation();
+        mProgressDialog.dismiss();
+        mAlertDialog.show();
+    }
+
+    private void callTeamDetailsActivity() {
+        mProgressDialog.dismiss();
+        ((SingleFragmentActivity) getActivity()).unlockScreenRotation();
+        mTeam.getPlayers().addAll(mTeamPlayers);
+        Intent callTeamDetailsActivity = new Intent(getActivity(),
+                TeamDetailsActivity.class);
+        callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
+        callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_TEAM, mTeam);
+        callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_TEAM_LOGO_BITMAP, mTeamLogoBitmap);
+        startActivity(callTeamDetailsActivity);
     }
 
     private class LeagueStandingsAdapter extends ArrayAdapter<LeagueTableStanding> implements Filterable {
@@ -278,6 +309,7 @@ public class LeagueTableFragment extends Fragment {
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    ((SingleFragmentActivity) getActivity()).lockScreenRotation();
                     //Set booleans to false to indicate that we will start fetching both entities
                     mFetchTeam = false;
                     mFetchPlayers = false;
@@ -336,25 +368,6 @@ public class LeagueTableFragment extends Fragment {
         }
     }
 
-    /**
-     * Method to notify the user of errors when trying to fetch data from the WS
-     */
-    private void errorOccurredInAsyncTasks(){
-        cancelAllAsyncTasks();
-        mProgressDialog.dismiss();
-        mAlertDialog.show();
-    }
-
-    private void callTeamDetailsActivity(){
-        mProgressDialog.dismiss();
-        mTeam.getPlayers().addAll(mTeamPlayers);
-        Intent callTeamDetailsActivity = new Intent(getActivity(),
-                TeamDetailsActivity.class);
-        callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_LEAGUE_STANDING, mLeagueTableStanding);
-        callTeamDetailsActivity.putExtra(TeamDetailsFragment.EXTRA_TEAM, mTeam);
-        startActivity(callTeamDetailsActivity);
-    }
-
     private class FetchTeamDetailsTask extends AsyncTask<LeagueTableStanding, Void, Void> {
 
         @Override
@@ -380,10 +393,8 @@ public class LeagueTableFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             if (mTeam != null) {
-                mFetchTeam = true;
-                if (mFetchPlayers) {
-                    callTeamDetailsActivity();
-                }
+                mDownloadCrestImageTask = new DownloadCrestImageTask();
+                mDownloadCrestImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } else {
                 errorOccurredInAsyncTasks();
             }
@@ -420,4 +431,41 @@ public class LeagueTableFragment extends Fragment {
             }
         }
     }
+
+    /**
+     * AsyncTask that downloads an image for the given URL, and sets the Bitmap in the UI thread
+     */
+    public class DownloadCrestImageTask extends AsyncTask<String, Void, Drawable> {
+
+        @Override
+        protected Drawable doInBackground(String... strings) {
+            return WebServiceUtils.downloadSVGFromUrlAndConvertToDrawable(
+                    mTeam.getCrestURL(),
+                    getActivity(),
+                    mTeam.getName());
+        }
+
+        @Override
+        public void onPostExecute(Drawable drawable) {
+            // show downloaded bitmap in the imageView
+            if (drawable != null) {
+                Bitmap bitmap = null;
+                try {
+                    bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                    drawable.draw(canvas);
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
+                mTeamLogoBitmap = BitmapUtils.scaleDownBitmap(bitmap, 100, getActivity());
+            } else {
+                mTeamLogoBitmap = null;
+            }
+            mFetchTeam = true;
+            if (mFetchPlayers)
+                callTeamDetailsActivity();
+        }
+    }
+
 }
